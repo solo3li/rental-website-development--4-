@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-  {% if is_ar and property.title_ar %}{{ property.title_ar }}{% else %}{{ property.title }}{% endif %} — Horizon Realty
+  {% if is_ar and property.title_ar %}{{ property.title_ar }}{% else %}{{ property.title }}{% endif %} — {% if is_ar %}سكن طلاب القاهرة{% else %}Cairo Student Living{% endif %}
 {% endblock %}
 
 {% block content %}

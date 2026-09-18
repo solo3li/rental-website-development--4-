@@ -4,8 +4,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Horizon Realty — Modern Full-Stack Property Rentals & Sales{% endblock %}</title>
+  <title>{% block title %}{% if is_ar %}سكن طلاب القاهرة — منصة حجز وتأجير سكن الطلاب{% else %}Cairo Student Living — Premier Student Housing & Rentals{% endif %}{% endblock %}</title>
   
+  <!-- Favicon & Touch Icons -->
+  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="64x64" href="{% static 'images/favicon.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+
   <!-- Modern Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,11 +35,18 @@
       
       <!-- Logo & Branding -->
       <div class="flex items-center gap-3">
-        <a href="/?listing_type={{ listing_type }}" class="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5 hover:opacity-90 transition">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-            <i data-lucide="home" class="w-5 h-5"></i>
+        <a href="/?listing_type={{ listing_type }}" class="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-3 hover:opacity-95 transition group">
+          <div class="relative w-10 h-10 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-center p-1 group-hover:border-emerald-300 transition-colors">
+            <img src="{% static 'images/logo_icon.png' %}" alt="Cairo Student Housing" class="w-full h-full object-contain">
           </div>
-          <span class="tracking-tight font-extrabold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">Horizon</span>
+          <div class="flex flex-col">
+            <span class="tracking-tight font-extrabold text-lg sm:text-xl leading-tight bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-800 bg-clip-text text-transparent">
+              {% if is_ar %}سكن طلاب القاهرة{% else %}Cairo Student Living{% endif %}
+            </span>
+            <span class="text-[10px] font-semibold text-emerald-600 tracking-wider uppercase -mt-0.5">
+              {% if is_ar %}سكن وإقامات جامعية{% else %}Student Housing & Rentals{% endif %}
+            </span>
+          </div>
         </a>
       </div>
 
@@ -126,8 +139,8 @@
   <footer class="mt-16 bg-white border-t border-slate-200 py-10 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-2 font-bold text-slate-700 text-sm">
-        <div class="w-6 h-6 rounded-lg bg-emerald-600 flex items-center justify-center text-white text-xs">H</div>
-        <span>Horizon Realty Platform &copy; 2026</span>
+        <img src="{% static 'images/logo_icon.png' %}" alt="Logo" class="w-7 h-7 object-contain">
+        <span>{% if is_ar %}منصة سكن طلاب القاهرة{% else %}Cairo Student Living Platform{% endif %} &copy; 2026</span>
       </div>
       <div class="flex items-center gap-6">
         <a href="/admin/" class="hover:text-slate-900 transition">PostGIS Admin</a>
