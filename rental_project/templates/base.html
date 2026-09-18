@@ -50,24 +50,29 @@
         </a>
       </div>
 
-      <!-- Center: Segmented Pills (Buy / Rent / Sell / Find Agent) -->
-      <nav class="hidden md:flex items-center bg-slate-100/90 p-1 rounded-full border border-slate-200/60 shadow-xs">
-        <a href="/?listing_type=buy"
-          class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all duration-200 {% if listing_type == 'buy' %}bg-[#16A34A] text-white shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-white/60{% endif %}">
-          {{ t.buy }}
+      <!-- Center: Student Navigation Pills -->
+      <nav class="hidden lg:flex items-center bg-slate-100/90 p-1 rounded-full border border-slate-200/60 shadow-xs">
+        <a href="/"
+          class="px-4 py-1.5 text-xs font-bold rounded-full transition-all duration-200 {% if not request.GET.gender and not request.GET.rental_type and request.resolver_match.app_name != 'roommates' %}bg-[#16A34A] text-white shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-white/60{% endif %}">
+          {% if is_ar %}جميع السكن{% else %}All Housing{% endif %}
         </a>
-        <a href="/?listing_type=rent"
-          class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all duration-200 {% if listing_type != 'buy' %}bg-[#16A34A] text-white shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-white/60{% endif %}">
-          {{ t.rent }}
+        <a href="/?gender=female"
+          class="px-4 py-1.5 text-xs font-bold rounded-full transition-all duration-200 {% if request.GET.gender == 'female' %}bg-rose-600 text-white shadow-xs{% else %}text-rose-600 hover:bg-rose-50{% endif %}">
+          {% if is_ar %}سكن طالبات (بنات){% else %}Female Only{% endif %}
         </a>
-        <button onclick="window.openModal('addPropertyModal')"
-          class="px-5 py-1.5 text-sm font-semibold rounded-full text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all duration-200 cursor-pointer">
-          {{ t.sell }}
-        </button>
-        <button onclick="window.openModal('agentsModal')"
-          class="px-5 py-1.5 text-sm font-semibold rounded-full text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all duration-200 cursor-pointer">
-          {{ t.findAgent }}
-        </button>
+        <a href="/?gender=male"
+          class="px-4 py-1.5 text-xs font-bold rounded-full transition-all duration-200 {% if request.GET.gender == 'male' %}bg-blue-600 text-white shadow-xs{% else %}text-blue-600 hover:bg-blue-50{% endif %}">
+          {% if is_ar %}سكن طلاب (شباب){% else %}Male Only{% endif %}
+        </a>
+        <a href="/?rental_type=room"
+          class="px-4 py-1.5 text-xs font-bold rounded-full transition-all duration-200 {% if request.GET.rental_type == 'room' %}bg-[#16A34A] text-white shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-white/60{% endif %}">
+          {% if is_ar %}غرف خاصة{% else %}Private Rooms{% endif %}
+        </a>
+        <a href="/roommates/"
+          class="px-4 py-1.5 text-xs font-bold rounded-full transition-all duration-200 flex items-center gap-1.5 {% if request.resolver_match.app_name == 'roommates' %}bg-amber-500 text-white shadow-xs{% else %}text-amber-700 bg-amber-50/80 hover:bg-amber-100/80{% endif %}">
+          <i data-lucide="users" class="w-3.5 h-3.5"></i>
+          <span>{% if is_ar %}زملاء السكن (Roommates){% else %}Roommates{% endif %}</span>
+        </a>
       </nav>
 
       <!-- Right: Actions, Language Toggle, Saved Drawer, Admin Link -->

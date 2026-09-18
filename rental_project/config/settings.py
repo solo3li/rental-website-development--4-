@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'apps.core',
     'apps.properties',
     'apps.tours',
+    'apps.roommates',
 ]
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'

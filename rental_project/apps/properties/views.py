@@ -2,34 +2,57 @@ import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.db.models import Q
-from .models import Property
+from django.contrib.gis.db.models.functions import Distance
+from .models import Property, University, MetroStation
 from .forms import PropertyForm
 from apps.tours.forms import TourBookingForm
 
 def property_list(request):
     """
-    SSR Property Listing with Query Parameter Filters:
-    GET /?search=...&listing_type=...&property_type=...&bedrooms=...&price_range=...&family_mode=...&sort=...&view=...
+    SSR Student Housing Property Listing with Cairo University Proximity & Student Filters:
+    GET /?search=...&university=...&gender=...&rental_type=...&price_range=...&bills=...&sort=...&view=...
     """
-    queryset = Property.objects.all()
+    queryset = Property.objects.select_related('university', 'nearest_metro').all()
+    universities = University.objects.all()
+    metro_stations = MetroStation.objects.all()
 
     # Query Parameters
     search_query = request.GET.get('search', '').strip()
-    listing_type = request.GET.get('listing_type', 'rent')
-    property_type = request.GET.get('property_type', 'all')
-    bedrooms = request.GET.get('bedrooms', 'all')
+    university_id = request.GET.get('university')
+    gender = request.GET.get('gender')  # 'female', 'male'
+    rental_type = request.GET.get('rental_type', 'all')  # 'bed', 'room', 'apartment'
     price_range = request.GET.get('price_range', 'all')
-    family_mode = request.GET.get('family_mode') in ['true', '1', 'on']
+    bills_included = request.GET.get('bills') in ['true', '1', 'on']
+    has_elevator = request.GET.get('elevator') in ['true', '1', 'on']
+    has_study_desk = request.GET.get('study_desk') in ['true', '1', 'on']
     selected_amenities = request.GET.getlist('amenity')
-    sort_by = request.GET.get('sort', 'newest')
+    sort_by = request.GET.get('sort', 'proximity' if university_id and university_id != 'all' else 'newest')
     view_mode = request.GET.get('view', 'grid')  # 'grid' or 'map'
     selected_property_id = request.GET.get('property_id')
 
-    # 1. Filter by Listing Type (rent vs buy)
-    if listing_type in ['rent', 'buy']:
-        queryset = queryset.filter(listing_type=listing_type)
+    selected_university = None
+    if university_id and university_id != 'all':
+        try:
+            selected_university = University.objects.get(pk=university_id)
+            if selected_university.location:
+                # PostGIS Spatial distance annotation (in meters/kilometers)
+                queryset = queryset.annotate(spatial_distance=Distance('location', selected_university.location))
+                if sort_by == 'proximity' or not sort_by:
+                    queryset = queryset.order_by('spatial_distance')
+        except University.DoesNotExist:
+            selected_university = None
 
-    # 2. Search query filter
+    # 1. Filter by Gender Policy
+    if gender == 'female':
+        queryset = queryset.filter(gender_policy='female_only')
+    elif gender == 'male':
+        queryset = queryset.filter(gender_policy='male_only')
+
+    # 2. Filter by Rental Type
+    if rental_type and rental_type != 'all':
+        queryset = queryset.filter(rental_type=rental_type)
+
+    # 3. Search query filter
     if search_query:
         queryset = queryset.filter(
             Q(title__icontains=search_query) |
@@ -37,63 +60,50 @@ def property_list(request):
             Q(city__icontains=search_query) |
             Q(state__icontains=search_query) |
             Q(address__icontains=search_query) |
-            Q(description__icontains=search_query)
+            Q(description__icontains=search_query) |
+            Q(description_ar__icontains=search_query) |
+            Q(university__name_ar__icontains=search_query) |
+            Q(nearest_metro__name_ar__icontains=search_query)
         )
 
-    # 3. Property Type filter
-    if property_type and property_type != 'all':
-        queryset = queryset.filter(property_type__iexact=property_type)
-
-    # 4. Bedrooms filter
-    if bedrooms == '1':
-        queryset = queryset.filter(bedrooms=1)
-    elif bedrooms == '2-4':
-        queryset = queryset.filter(bedrooms__gte=2, bedrooms__lte=4)
-    elif bedrooms == '5+':
-        queryset = queryset.filter(bedrooms__gte=5)
-
-    # 5. Price range filter
+    # 4. Price range filter in EGP
     if price_range and price_range != 'all':
-        price_field = 'buy_price' if listing_type == 'buy' else 'price'
-        if listing_type == 'buy':
-            if price_range == '<150k':
-                queryset = queryset.filter(buy_price__lt=150000)
-            elif price_range == '150k-300k':
-                queryset = queryset.filter(buy_price__gte=150000, buy_price__lte=300000)
-            elif price_range == '300k-500k':
-                queryset = queryset.filter(buy_price__gte=300000, buy_price__lte=500000)
-            elif price_range == '500k+':
-                queryset = queryset.filter(buy_price__gt=500000)
-        else:
-            if price_range == '<2000':
-                queryset = queryset.filter(price__lt=2000)
-            elif price_range == '2000-3000':
-                queryset = queryset.filter(price__gte=2000, price__lte=3000)
-            elif price_range == '3000-4000':
-                queryset = queryset.filter(price__gte=3000, price__lte=4000)
-            elif price_range == '4000+':
-                queryset = queryset.filter(price__gt=4000)
+        if price_range == '<2000':
+            queryset = queryset.filter(price_egp__lt=2000)
+        elif price_range == '2000-3500':
+            queryset = queryset.filter(price_egp__gte=2000, price_egp__lte=3500)
+        elif price_range == '3500-5000':
+            queryset = queryset.filter(price_egp__gte=3500, price_egp__lte=5000)
+        elif price_range == '5000+':
+            queryset = queryset.filter(price_egp__gt=5000)
 
-    # 6. Family Mode filter
-    if family_mode:
-        queryset = queryset.filter(is_family_friendly=True)
+    # 5. Student Specific Filters
+    if bills_included:
+        queryset = queryset.filter(bills_included=True)
+    if has_elevator:
+        queryset = queryset.filter(has_elevator=True)
+    if has_study_desk:
+        queryset = queryset.filter(study_desk=True)
 
-    # 7. Amenities filter (JSONField containment)
+    # 6. Amenities filter
     if selected_amenities:
         for amenity in selected_amenities:
             queryset = queryset.filter(amenities__contains=[amenity])
 
-    # 8. Sorting
+    # 7. Sorting
     if sort_by == 'price_asc':
-        order_field = 'buy_price' if listing_type == 'buy' else 'price'
-        queryset = queryset.order_by(order_field)
+        queryset = queryset.order_by('price_egp')
     elif sort_by == 'price_desc':
-        order_field = '-buy_price' if listing_type == 'buy' else '-price'
-        queryset = queryset.order_by(order_field)
+        queryset = queryset.order_by('-price_egp')
+    elif sort_by == 'beds_available':
+        queryset = queryset.order_by('-available_beds')
     elif sort_by == 'popular':
         queryset = queryset.order_by('-featured', 'posted_days_ago', '-created_at')
-    else:  # newest
-        queryset = queryset.order_by('-created_at')
+    elif sort_by == 'proximity' and selected_university:
+        queryset = queryset.order_by('spatial_distance')
+    else:
+        if not selected_university:
+            queryset = queryset.order_by('-created_at')
 
     # Selected Property for detail view/modal if requested via URL
     selected_property = None
@@ -106,56 +116,73 @@ def property_list(request):
     # Serialization of properties for interactive Map & Drawer
     properties_data = []
     for p in queryset:
+        dist_str = ""
+        if hasattr(p, 'spatial_distance') and p.spatial_distance:
+            km = p.spatial_distance.km
+            dist_str = f"{km:.1f} كم من الجامعة"
+        else:
+            dist_str = f"{p.distance_to_university_km} كم من الجامعة"
+
         properties_data.append({
             'id': p.id,
             'title': p.title,
             'title_ar': p.title_ar,
             'description': p.description,
             'description_ar': p.description_ar,
-            'price': p.price,
-            'buy_price': p.buy_price,
-            'listing_type': p.listing_type,
-            'rental_period': p.rental_period,
-            'property_type': p.property_type,
+            'price_egp': p.price_egp,
+            'deposit_egp': p.deposit_egp,
+            'bills_included': p.bills_included,
+            'rental_type': p.rental_type,
+            'rental_type_display': p.get_rental_type_display_ar(),
+            'gender_policy': p.gender_policy,
+            'gender_display': p.get_gender_display_ar(),
+            'total_capacity': p.total_capacity,
+            'available_beds': p.available_beds,
+            'university_name': p.university.name_ar if p.university else "بالقرب من الجامعات",
+            'nearest_metro': p.nearest_metro.name_ar if p.nearest_metro else None,
+            'distance_to_university': dist_str,
+            'walking_minutes': p.walking_minutes,
             'address': p.address,
             'city': p.city,
-            'state': p.state,
-            'zip_code': p.zip_code,
-            'country': p.country,
             'bedrooms': p.bedrooms,
             'bathrooms': p.bathrooms,
             'area_sqft': p.area_sqft,
             'images': p.images or [],
             'featured': p.featured,
             'badge': p.badge,
-            'posted_days_ago': p.posted_days_ago,
-            'is_family_friendly': p.is_family_friendly,
-            'family_highlights': p.family_highlights or [],
-            'amenities': p.amenities or [],
+            'study_desk': p.study_desk,
+            'wifi_speed': p.wifi_speed,
+            'curfew_time': p.curfew_time,
+            'has_elevator': p.has_elevator,
             'agent_name': p.agent_name,
             'agent_phone': p.agent_phone,
-            'agent_email': p.agent_email,
-            'agent_avatar': p.agent_avatar,
+            'whatsapp_number': p.whatsapp_number,
+            'whatsapp_url': p.get_whatsapp_url(is_ar=True),
             'lat': p.lat,
             'lng': p.lng,
         })
 
     all_amenities_list = [
-        "Swimming Pool", "Garage", "Air Conditioning", "Balcony",
-        "Garden", "Pet Friendly", "Furnished", "High-speed WiFi"
+        "إنترنت فائق السرعة Wi-Fi", "تكييف", "مكتب مذاكرة", "غسالة ملابس",
+        "مطبخ مجهز بالكامل", "مصعد (أسانسير)", "سخان مياه", "أمن وإشراف"
     ]
 
     context = {
         'properties': queryset,
         'properties_json': json.dumps(properties_data),
         'count': queryset.count(),
+        'universities': universities,
+        'selected_university': selected_university,
+        'selected_university_id': university_id or 'all',
+        'metro_stations': metro_stations,
         'selected_property': selected_property,
         'search_query': search_query,
-        'listing_type': listing_type,
-        'property_type': property_type,
-        'bedrooms': bedrooms,
+        'gender': gender or 'all',
+        'rental_type': rental_type,
         'price_range': price_range,
-        'family_mode': family_mode,
+        'bills_included': bills_included,
+        'has_elevator': has_elevator,
+        'has_study_desk': has_study_desk,
         'selected_amenities': selected_amenities,
         'sort_by': sort_by,
         'view_mode': view_mode,
@@ -166,8 +193,8 @@ def property_list(request):
     return render(request, 'properties/index.html', context)
 
 def property_detail(request, pk):
-    """Dedicated Detail Page for SEO and direct links"""
-    prop = get_object_or_404(Property, pk=pk)
+    """Dedicated Detail Page for student accommodations"""
+    prop = get_object_or_404(Property.objects.select_related('university', 'nearest_metro'), pk=pk)
     context = {
         'property': prop,
         'tour_form': TourBookingForm(initial={'property': prop}),
@@ -175,13 +202,13 @@ def property_detail(request, pk):
     return render(request, 'properties/detail.html', context)
 
 def property_create(request):
-    """Handle new property submission from frontend modal"""
+    """Handle new student property submission from frontend modal"""
     if request.method == 'POST':
         form = PropertyForm(request.POST)
         if form.is_valid():
             new_prop = form.save()
-            messages.success(request, f"Property '{new_prop.title}' has been successfully listed!")
-            return redirect(f"/?listing_type={new_prop.listing_type}")
+            messages.success(request, f"تم إضافة السكن '{new_prop.title_ar or new_prop.title}' بنجاح!")
+            return redirect('/')
         else:
-            messages.error(request, "Please correct the errors in the form.")
+            messages.error(request, "يرجى تصحيح الأخطاء في النموذج.")
     return redirect('/')

@@ -7,6 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('i18n/', include('django.conf.urls.i18n')),
     path('tours/', include('apps.tours.urls')),
+    path('roommates/', include('apps.roommates.urls')),
     path('', include('apps.properties.urls')),
     path('', include('apps.core.urls')),
 ]

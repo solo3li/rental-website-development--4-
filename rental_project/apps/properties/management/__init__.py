@@ -1,1 +1,1 @@
-# management init
+# management package

@@ -10,9 +10,9 @@
   
   <!-- Back Button -->
   <div class="mb-6">
-    <a href="/?listing_type={{ property.listing_type }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-4 py-2 rounded-full shadow-2xs transition">
-      <i data-lucide="chevron-left" class="w-4 h-4"></i>
-      <span>Back to Listings</span>
+    <a href="/" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-4 py-2 rounded-full shadow-2xs transition">
+      <i data-lucide="chevron-right" class="w-4 h-4"></i>
+      <span>{% if is_ar %}العودة لقائمة السكن{% else %}Back to Listings{% endif %}</span>
     </a>
   </div>
 
@@ -38,33 +38,77 @@
     <!-- Title & Specs Header -->
     <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-6 border-b border-slate-100">
       <div>
-        <div class="flex items-center gap-2 mb-2">
-          {% if property.badge %}
-          <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold px-3 py-1 rounded-full">
-            {{ property.badge }}
+        <div class="flex flex-wrap items-center gap-2 mb-2.5">
+          <!-- Gender Badge -->
+          {% if property.gender_policy == 'female_only' %}
+          <span class="bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+            <span>🌸 سكن طالبات (بنات فقط)</span>
+          </span>
+          {% elif property.gender_policy == 'male_only' %}
+          <span class="bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+            <span>👔 سكن طلاب (شباب فقط)</span>
+          </span>
+          {% else %}
+          <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1 rounded-full">
+            <span>متاح للجميع</span>
           </span>
           {% endif %}
-          <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-1 rounded-full uppercase">
-            {{ property.property_type }}
+
+          <!-- Rental Type Badge -->
+          <span class="bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold px-3 py-1 rounded-full">
+            {{ property.get_rental_type_display_ar }}
+          </span>
+
+          <!-- Available Beds Badge -->
+          <span class="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-extrabold px-3 py-1 rounded-full flex items-center gap-1">
+            <i data-lucide="bed" class="w-3.5 h-3.5"></i>
+            <span>متبقي {{ property.available_beds }} من أصل {{ property.total_capacity }} أسِرّة</span>
           </span>
         </div>
+
         <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
           {% if is_ar and property.title_ar %}{{ property.title_ar }}{% else %}{{ property.title }}{% endif %}
         </h1>
-        <p class="text-sm text-slate-500 mt-1 flex items-center gap-1.5">
+        
+        <p class="text-sm text-slate-500 mt-2 flex items-center gap-2">
           <i data-lucide="map-pin" class="w-4 h-4 text-emerald-600 shrink-0"></i>
-          <span>{{ property.address }}, {{ property.city }}, {{ property.state }} {{ property.zip_code }}</span>
+          <span>{{ property.address }} — {{ property.city }}، {{ property.state }}</span>
         </p>
+
+        <!-- Proximity to Campus & Metro Strip -->
+        <div class="flex flex-wrap items-center gap-3 mt-3">
+          {% if property.university %}
+          <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
+            <i data-lucide="graduation-cap" class="w-4 h-4 text-emerald-600"></i>
+            <span>{{ property.walking_minutes }} دقيقة مشياً إلى {{ property.university.name_ar }} ({{ property.distance_to_university_km }} كم)</span>
+          </div>
+          {% endif %}
+          {% if property.nearest_metro %}
+          <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">
+            <i data-lucide="train" class="w-4 h-4 text-slate-500"></i>
+            <span>أقرب محطة مترو: محطة {{ property.nearest_metro.name_ar }}</span>
+          </div>
+          {% endif %}
+        </div>
       </div>
 
-      <div class="text-left md:text-right shrink-0">
+      <!-- Price Box -->
+      <div class="text-left md:text-right shrink-0 bg-slate-50 p-5 rounded-2xl border border-slate-100">
         <div class="text-3xl font-extrabold text-emerald-600 tracking-tight">
-          {% if property.listing_type == 'buy' %}${{ property.buy_price|default:150000 }}{% else %}${{ property.price }}{{ t.perMonth }}{% endif %}
+          {{ property.price_egp|default:property.price }} <span class="text-base font-bold text-slate-700">ج.م / شهر</span>
         </div>
-        <div class="flex items-center gap-3 text-xs font-semibold text-slate-700 mt-3">
-          <span class="px-3 py-1.5 rounded-xl bg-slate-100">{{ property.bedrooms }} {{ t.beds }}</span>
-          <span class="px-3 py-1.5 rounded-xl bg-slate-100">{{ property.bathrooms }} {{ t.baths }}</span>
-          <span class="px-3 py-1.5 rounded-xl bg-slate-100">{{ property.area_sqft }} {{ t.sqft }}</span>
+        <div class="text-xs font-semibold text-slate-500 mt-1">
+          مبلغ التأمين: {{ property.deposit_egp }} ج.م
+        </div>
+        <div class="mt-2">
+          {% if property.bills_included %}
+          <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-100/70 px-2.5 py-1 rounded-full">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+            <span>شامل فواتير الكهرباء والمياه والإنترنت</span>
+          </span>
+          {% else %}
+          <span class="text-xs text-slate-500 font-medium">الفواتير تقسم شهرياً بالتساوي</span>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -72,18 +116,73 @@
     <!-- Details Grid: Description + Sidebar -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
       
-      <!-- Left Column (Description, Amenities, Highlights) -->
+      <!-- Left Column (Description, Student Specs, Amenities) -->
       <div class="lg:col-span-2 space-y-8">
         <div>
-          <h3 class="text-base font-bold text-slate-900 mb-3">{{ t.description }}</h3>
-          <p class="text-sm text-slate-600 leading-relaxed">
+          <h3 class="text-base font-bold text-slate-900 mb-3">تفاصيل السكن</h3>
+          <p class="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
             {% if is_ar and property.description_ar %}{{ property.description_ar }}{% else %}{{ property.description }}{% endif %}
           </p>
         </div>
 
+        <!-- Student Specs Summary Cards -->
+        <div>
+          <h3 class="text-base font-bold text-slate-900 mb-4">مميزات وقواعد السكن الطلابي</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs">
+              <span class="text-slate-400 block mb-1">سرعة الإنترنت</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1">
+                <i data-lucide="wifi" class="w-3.5 h-3.5 text-emerald-600"></i>
+                {{ property.wifi_speed|default:"متوفر فايبر" }}
+              </span>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs">
+              <span class="text-slate-400 block mb-1">مكتب دراسة</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1">
+                <i data-lucide="book-open" class="w-3.5 h-3.5 text-emerald-600"></i>
+                {% if property.study_desk %}متوفر مكتب مخصص{% else %}غير متوفر{% endif %}
+              </span>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs">
+              <span class="text-slate-400 block mb-1">ميعاد غلق الباب</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-600"></i>
+                {{ property.curfew_time|default:"مفتوح" }}
+              </span>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs">
+              <span class="text-slate-400 block mb-1">الدور / الطابق</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1">
+                <i data-lucide="layers" class="w-3.5 h-3.5 text-emerald-600"></i>
+                الدور {{ property.floor_number }} {% if property.has_elevator %}(يوجد مصعد){% else %}(بدون مصعد){% endif %}
+              </span>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs">
+              <span class="text-slate-400 block mb-1">الأمن والإشراف</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+                {% if property.is_supervised %}أمن وإشراف متوفر{% else %}سكن مستقل{% endif %}
+              </span>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs">
+              <span class="text-slate-400 block mb-1">الغرف والحمامات</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1">
+                <i data-lucide="door-closed" class="w-3.5 h-3.5 text-emerald-600"></i>
+                {{ property.bedrooms }} غرف نوم / {{ property.bathrooms }} حمام
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Amenities -->
         {% if property.amenities %}
         <div>
-          <h3 class="text-base font-bold text-slate-900 mb-4">{{ t.amenities }}</h3>
+          <h3 class="text-base font-bold text-slate-900 mb-4">الخدمات والتجهيزات المتاحة</h3>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {% for a in property.amenities %}
             <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/70 text-slate-700 text-xs font-medium">
@@ -95,109 +194,101 @@
         </div>
         {% endif %}
 
-        {% if property.family_highlights %}
+        <!-- Interactive Map of Property Location -->
         <div>
-          <h3 class="text-base font-bold text-slate-900 mb-3">{{ t.familyHighlights }}</h3>
-          <ul class="space-y-2">
-            {% for h in property.family_highlights %}
-            <li class="flex items-center gap-2 text-xs text-slate-600">
-              <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
-              <span>{{ h }}</span>
-            </li>
-            {% endfor %}
-          </ul>
-        </div>
-        {% endif %}
-
-        <!-- Cost Breakdown -->
-        <div class="bg-slate-50 border border-slate-200 rounded-3xl p-6">
-          <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">{{ t.costBreakdown }}</h4>
-          <div class="space-y-3 text-xs">
-            <div class="flex justify-between text-slate-600">
-              <span>{{ t.baseRent }}</span>
-              <span class="font-semibold text-slate-900">${{ property.price }}</span>
-            </div>
-            <div class="flex justify-between text-slate-600">
-              <span>{{ t.securityDeposit }}</span>
-              <span class="font-semibold text-slate-900">${{ property.price|add:property.price }}</span>
-            </div>
-            <div class="flex justify-between text-slate-600">
-              <span>{{ t.estUtilities }}</span>
-              <span class="font-semibold text-slate-900">$210</span>
-            </div>
-            <div class="flex justify-between pt-3 border-t border-slate-200 text-sm font-bold text-slate-900">
-              <span>{{ t.totalMonthly }}</span>
-              <span class="text-emerald-600">${{ property.price|add:210 }}</span>
-            </div>
+          <h3 class="text-base font-bold text-slate-900 mb-3">موقع السكن على خريطة القاهرة</h3>
+          <div class="h-64 rounded-2xl overflow-hidden border border-slate-200 relative bg-slate-100 flex items-center justify-center text-xs text-slate-500">
+            <iframe
+              width="100%"
+              height="100%"
+              frameborder="0"
+              scrolling="no"
+              marginheight="0"
+              marginwidth="0"
+              src="https://www.openstreetmap.org/export/embed.html?bbox={{ property.lng }}%2C{{ property.lat }}%2C{{ property.lng }}%2C{{ property.lat }}&amp;layer=mapnik&amp;marker={{ property.lat }}%2C{{ property.lng }}"
+              style="border: 0">
+            </iframe>
           </div>
         </div>
+
       </div>
 
-      <!-- Right Column: Agent & Tour Booking Form -->
+      <!-- Right Column: Direct WhatsApp, Phone & Tour Booking Form -->
       <div class="space-y-6">
-        <!-- Agent Card -->
-        <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs">
-          <div class="flex items-center gap-4 mb-4">
-            <img src="{{ property.agent_avatar }}" class="w-14 h-14 rounded-full object-cover border-2 border-emerald-500 shadow-sm" />
+        
+        <!-- Direct WhatsApp & Phone Contact Box -->
+        <div class="bg-gradient-to-br from-emerald-500 to-teal-700 rounded-3xl p-6 text-white shadow-lg">
+          <div class="flex items-center gap-3.5 mb-4">
+            <img src="{{ property.agent_avatar }}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" />
             <div>
-              <div class="text-xs text-slate-400 font-semibold">{{ t.agentContact }}</div>
-              <div class="font-bold text-slate-900 text-sm">{{ property.agent_name }}</div>
-              <div class="text-xs text-slate-500">{{ property.agent_phone }}</div>
+              <div class="text-[11px] text-emerald-100 font-semibold">المشرف / صاحب السكن</div>
+              <div class="font-extrabold text-white text-base">{{ property.agent_name }}</div>
             </div>
           </div>
-          <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
-            <a href="tel:{{ property.agent_phone }}" class="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold text-center transition">
-              {{ t.callAgent }}
+          
+          <p class="text-xs text-emerald-50 mb-5 leading-relaxed">
+            للاستفسار السريع عن توافر الأسِرّة وموعد المعاينة، يمكنك المراسلة عبر واتساب مباشرة أو الاتصال هاتفياً.
+          </p>
+
+          <div class="space-y-2.5">
+            <a href="{{ property.get_whatsapp_url }}" target="_blank"
+              class="w-full py-3 px-4 rounded-xl bg-white text-emerald-800 hover:bg-emerald-50 font-bold text-xs flex items-center justify-center gap-2 shadow-md transition transform hover:scale-[1.01]">
+              <i data-lucide="message-circle" class="w-4 h-4 text-emerald-600"></i>
+              <span>محادثة واتساب فورية</span>
             </a>
-            <a href="mailto:{{ property.agent_email }}" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold text-center transition shadow-xs">
-              {{ t.emailAgent }}
+
+            <a href="tel:{{ property.agent_phone }}"
+              class="w-full py-2.5 px-4 rounded-xl bg-emerald-800/60 hover:bg-emerald-800/80 text-white font-bold text-xs flex items-center justify-center gap-2 transition">
+              <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+              <span>اتصال هاتفي: {{ property.agent_phone }}</span>
             </a>
           </div>
         </div>
 
-        <!-- Schedule Tour Box -->
+        <!-- Schedule In-Person or Video Tour Form -->
         <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs">
           <h3 class="font-bold text-slate-900 text-sm mb-1 flex items-center gap-2">
             <i data-lucide="calendar" class="w-4 h-4 text-emerald-600"></i>
-            <span>{{ t.bookTourTitle }}</span>
+            <span>طلب معاينة سكن (حضورية / فيديو)</span>
           </h3>
-          <p class="text-xs text-slate-500 mb-4">Book a walkthrough in person or on video.</p>
+          <p class="text-xs text-slate-500 mb-4">حدد موعدك وسيتواصل معك مشرف السكن لتأكيده.</p>
 
           <form action="/tours/book/" method="POST" class="space-y-3 text-xs">
             {% csrf_token %}
             <input type="hidden" name="property" value="{{ property.id }}">
             
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">{{ t.fullName }}</label>
+              <label class="block font-semibold text-slate-700 mb-1">الاسم بالكامل *</label>
               {{ tour_form.full_name }}
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">{{ t.email }}</label>
+              <label class="block font-semibold text-slate-700 mb-1">البريد الإلكتروني *</label>
               {{ tour_form.email }}
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">{{ t.phone }}</label>
+              <label class="block font-semibold text-slate-700 mb-1">رقم الهاتف / الواتساب *</label>
               {{ tour_form.phone }}
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">{{ t.tourDate }}</label>
+              <label class="block font-semibold text-slate-700 mb-1">تاريخ وموعد المعاينة المقترح</label>
               {{ tour_form.tour_date }}
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">{{ t.tourType }}</label>
+              <label class="block font-semibold text-slate-700 mb-1">نوع المعاينة</label>
               {{ tour_form.tour_type }}
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">{{ t.notes }}</label>
+              <label class="block font-semibold text-slate-700 mb-1">ملاحظات أو استفسارات إضافية</label>
               {{ tour_form.message }}
             </div>
 
-            <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md">
-              <i data-lucide="check" class="w-4 h-4"></i>
-              <span>{{ t.confirmTour }}</span>
+            <button type="submit" class="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              <span>إرسال طلب المعاينة</span>
             </button>
           </form>
         </div>
+
       </div>
 
     </div>

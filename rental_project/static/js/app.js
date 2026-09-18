@@ -111,41 +111,38 @@ document.addEventListener("DOMContentLoaded", function () {
     setElText("modalBadge", propertyData.badge || "Perfect Fit");
     setElText("modalDesc", desc);
 
-    // Pricing
-    const isBuy = propertyData.listing_type === "buy";
-    const priceText = isBuy 
-      ? `$${(propertyData.buy_price || 150000).toLocaleString()}` 
-      : `$${(propertyData.price || 2000).toLocaleString()}`;
+    // Pricing in EGP
+    const rentVal = propertyData.price_egp || propertyData.price || 2500;
+    const priceText = `${rentVal.toLocaleString()} ج.م`;
     setElText("modalPrice", priceText);
-    setElText("modalPriceSuffix", isBuy ? "" : "/mo");
+    setElText("modalPriceSuffix", "/ شهر");
 
-    // Cost Breakdown
-    const baseRent = propertyData.price || 2000;
-    const secDep = Math.round(baseRent * 1.5);
-    const estUtil = 210;
-    const totalMove = baseRent + secDep + estUtil;
-    setElText("modalBaseRent", `$${baseRent.toLocaleString()}`);
-    setElText("modalSecDeposit", `$${secDep.toLocaleString()}`);
-    setElText("modalTotalMoveIn", `$${totalMove.toLocaleString()}`);
+    // Cost Breakdown in EGP
+    const baseRent = rentVal;
+    const secDep = propertyData.deposit_egp || 2000;
+    const totalMove = baseRent + secDep;
+    setElText("modalBaseRent", `${baseRent.toLocaleString()} ج.م`);
+    setElText("modalSecDeposit", `${secDep.toLocaleString()} ج.م`);
+    setElText("modalTotalMoveIn", `${totalMove.toLocaleString()} ج.م`);
 
-    // Agent Details
-    setElText("modalAgentName", propertyData.agent_name || "Sarah Jenkins");
-    setElText("modalAgentPhone", propertyData.agent_phone || "+1 (555) 234-5678");
-    setElText("modalAgentEmail", propertyData.agent_email || "agent@horizon.com");
+    // Agent Details & Instant WhatsApp
+    setElText("modalAgentName", propertyData.agent_name || "مشرف السكن");
+    setElText("modalAgentPhone", propertyData.agent_phone || "+201012345678");
+    setElText("modalAgentEmail", propertyData.agent_email || "contact@sakancairo.com");
     
     const avatarEl = document.getElementById("modalAgentAvatar");
     if (avatarEl && propertyData.agent_avatar) {
       avatarEl.src = propertyData.agent_avatar;
     }
 
+    const whatsAppEl = document.getElementById("modalWhatsAppLink");
+    if (whatsAppEl && propertyData.whatsapp_url) {
+      whatsAppEl.href = propertyData.whatsapp_url;
+    }
+
     const callLink = document.getElementById("modalCallLink");
     if (callLink && propertyData.agent_phone) {
       callLink.href = `tel:${propertyData.agent_phone}`;
-    }
-
-    const emailLink = document.getElementById("modalEmailLink");
-    if (emailLink && propertyData.agent_email) {
-      emailLink.href = `mailto:${propertyData.agent_email}`;
     }
 
     // Amenities List
