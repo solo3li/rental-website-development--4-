@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+{% if is_ar %}إنشاء حساب طالب — سكن طلاب القاهرة{% else %}Student Registration — Cairo Student Living{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-10">
+  <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xl relative overflow-hidden">
+    
+    <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 to-teal-600"></div>
+
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 mb-3 shadow-xs">
+        <i data-lucide="graduation-cap" class="w-8 h-8"></i>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">تسجيل حساب طالب جديد</h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1">انضم لآلاف الطلاب وابحث عن سكنك الجامعي ورفيق سكنك المتوافق بسهولة</p>
+    </div>
+
+    <form method="POST" action="/accounts/register/student/" class="space-y-4">
+      {% csrf_token %}
+      
+      {% if form.errors %}
+      <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+        يرجى التأكد من صحة البيانات المدخلة وتعديل الحقول الموضحة.
+      </div>
+      {% endif %}
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الأول *</label>
+          {{ form.first_name }}
+          {{ form.first_name.errors }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">اسم العائلة *</label>
+          {{ form.last_name }}
+          {{ form.last_name.errors }}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني (الجامعي أو الشخصي) *</label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور *</label>
+          {{ form.password }}
+          {{ form.password.errors }}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">النوع (لتصنيف السكن) *</label>
+          {{ form.gender }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">الجامعة</label>
+          {{ form.university }}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">الكلية والتخصص</label>
+          {{ form.faculty }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">السنة الدراسية</label>
+          {{ form.academic_year }}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">رقم الهاتف *</label>
+          {{ form.phone }}
+          {{ form.phone.errors }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">رقم الواتساب</label>
+          {{ form.whatsapp }}
+        </div>
+      </div>
+
+      <div class="pt-4">
+        <button type="submit"
+          class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
+          <span>إنشاء حساب الطالب والبدء</span>
+        </button>
+      </div>
+
+      <div class="text-center pt-4 border-t border-slate-100 text-xs text-slate-500">
+        هل أنت صاحب سكن أو مؤجر؟ <a href="/accounts/register/landlord/" class="font-bold text-slate-900 hover:underline">سجل كصاحب سكن هنا</a>
+      </div>
+
+      <div class="text-center text-xs text-slate-500">
+        لديك حساب بالفعل؟ <a href="/accounts/login/" class="font-bold text-emerald-600 hover:underline">تسجيل الدخول</a>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

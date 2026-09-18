@@ -206,9 +206,19 @@ def property_create(request):
     if request.method == 'POST':
         form = PropertyForm(request.POST)
         if form.is_valid():
-            new_prop = form.save()
+            new_prop = form.save(commit=False)
+            if request.user.is_authenticated:
+                new_prop.owner = request.user
+                if hasattr(request.user, 'profile') and request.user.profile.phone:
+                    if not new_prop.agent_phone:
+                        new_prop.agent_phone = request.user.profile.phone
+                    if not new_prop.whatsapp_number:
+                        new_prop.whatsapp_number = request.user.profile.whatsapp or request.user.profile.phone
+            new_prop.save()
             messages.success(request, f"تم إضافة السكن '{new_prop.title_ar or new_prop.title}' بنجاح!")
+            if request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.is_landlord:
+                return redirect('accounts:dashboard')
             return redirect('/')
         else:
-            messages.error(request, "يرجى تصحيح الأخطاء في النموذج.")
+            messages.error(request, "يرجى تصحيح الأخطاء في النموذج والتأكد من ملء البيانات.")
     return redirect('/')

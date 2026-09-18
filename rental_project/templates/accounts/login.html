@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+{% if is_ar %}تسجيل الدخول — سكن طلاب القاهرة{% else %}Sign In — Cairo Student Living{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-[75vh] flex items-center justify-center px-4 py-12">
+  <div class="w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xl relative overflow-hidden">
+    
+    <!-- Top Decorative Line -->
+    <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600"></div>
+
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 mb-3 shadow-xs">
+        <img src="{% static 'images/logo_icon.png' %}" alt="Logo" class="w-8 h-8 object-contain">
+      </div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">تسجيل الدخول</h1>
+      <p class="text-xs text-slate-500 mt-1">مرحباً بك في منصة سكن طلاب القاهرة</p>
+    </div>
+
+    <form method="POST" action="/accounts/login/" class="space-y-4">
+      {% csrf_token %}
+      
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني أو اسم المستخدم</label>
+        <div class="relative">
+          {{ form.email }}
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور</label>
+        <div class="relative">
+          {{ form.password }}
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <button type="submit"
+          class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>تسجيل الدخول</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Quick Demo Accounts Box -->
+    <div class="mt-6 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-[11px] text-slate-600 space-y-1">
+      <div class="font-bold text-slate-800 flex items-center gap-1">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+        <span>بيانات الحسابات التجريبية الجاهزة للاختبار:</span>
+      </div>
+      <div class="flex justify-between items-center pt-1 border-t border-slate-200/60">
+        <span>👨‍🎓 حساب طالب:</span>
+        <button type="button" onclick="document.querySelector('[name=email]').value='student@cairo.edu.eg'; document.querySelector('[name=password]').value='student123';" class="text-emerald-700 font-bold hover:underline">student@cairo.edu.eg (student123)</button>
+      </div>
+      <div class="flex justify-between items-center">
+        <span>🏢 حساب صاحب سكن:</span>
+        <button type="button" onclick="document.querySelector('[name=email]').value='landlord@sakancairo.com'; document.querySelector('[name=password]').value='landlord123';" class="text-emerald-700 font-bold hover:underline">landlord@sakancairo.com (landlord123)</button>
+      </div>
+    </div>
+
+    <!-- Registration Links -->
+    <div class="mt-6 pt-5 border-t border-slate-100 text-center space-y-2 text-xs">
+      <p class="text-slate-500">ليس لديك حساب؟</p>
+      <div class="flex items-center justify-center gap-3">
+        <a href="/accounts/register/student/" class="font-bold text-emerald-700 hover:underline flex items-center gap-1">
+          <span>🎓 تسجيل كطالب</span>
+        </a>
+        <span class="text-slate-300">|</span>
+        <a href="/accounts/register/landlord/" class="font-bold text-slate-800 hover:underline flex items-center gap-1">
+          <span>🏢 تسجيل كصاحب سكن</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

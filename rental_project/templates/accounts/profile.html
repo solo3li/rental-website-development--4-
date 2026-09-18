@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+{% if is_ar %}الملف الشخصي — سكن طلاب القاهرة{% else %}My Profile — Cairo Student Living{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-10">
+
+  <!-- Profile Top Header Card -->
+  <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-md mb-8 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
+    <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-right">
+      <img src="{{ profile.avatar }}" class="w-20 h-20 rounded-full object-cover border-4 border-emerald-500 shadow-md" alt="Avatar" />
+      <div>
+        <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
+          <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">{{ user.get_full_name|default:user.username }}</h1>
+          {% if profile.is_landlord %}
+          <span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[11px] font-bold">صاحب سكن ومؤجر</span>
+          {% else %}
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">طالب جامعي</span>
+          {% endif %}
+        </div>
+        <p class="text-xs text-slate-500">{{ user.email }}</p>
+        {% if profile.university %}
+        <p class="text-xs text-emerald-700 font-semibold mt-1 flex items-center justify-center sm:justify-start gap-1">
+          <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+          <span>{{ profile.faculty }} — {{ profile.university.name_ar }}</span>
+        </p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right Side Actions -->
+    <div class="flex items-center gap-2">
+      {% if profile.is_landlord %}
+      <a href="/accounts/dashboard/" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+        <i data-lucide="layout-dashboard" class="w-4 h-4 text-emerald-400"></i>
+        <span>لوحة تحكم السكن</span>
+      </a>
+      {% endif %}
+      <a href="/accounts/logout/" class="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition flex items-center gap-1.5">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+        <span>تسجيل الخروج</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Profile Edit Form -->
+  <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-md mb-8">
+    <h2 class="text-base font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+      <i data-lucide="user-cog" class="w-4 h-4 text-emerald-600"></i>
+      <span>تعديل البيانات الشخصية</span>
+    </h2>
+
+    <form method="POST" action="/accounts/profile/" class="space-y-4">
+      {% csrf_token %}
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الأول</label>
+          {{ form.first_name }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">اسم العائلة</label>
+          {{ form.last_name }}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">رقم الهاتف</label>
+          {{ form.phone }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">رقم الواتساب</label>
+          {{ form.whatsapp }}
+        </div>
+      </div>
+
+      {% if profile.is_student %}
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">الجامعة</label>
+          {{ form.university }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">الكلية</label>
+          {{ form.faculty }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">السنة الدراسية</label>
+          {{ form.academic_year }}
+        </div>
+      </div>
+      {% else %}
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">اسم الشركة أو المكتب</label>
+        {{ form.company_name }}
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">نبذة عن خدمات السكن</label>
+        {{ form.bio }}
+      </div>
+      {% endif %}
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">رابط صورة البروفايل (Avatar URL)</label>
+        {{ form.avatar }}
+      </div>
+
+      <div class="pt-2">
+        <button type="submit"
+          class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm flex items-center gap-2 cursor-pointer">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>حفظ التعديلات</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- If Student: Roommate Requests Section -->
+  {% if profile.is_student and my_roommate_posts %}
+  <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-md">
+    <h2 class="text-base font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+      <i data-lucide="users" class="w-4 h-4 text-emerald-600"></i>
+      <span>طلبات رفقاء السكن المنشورة باسمك</span>
+    </h2>
+
+    <div class="space-y-3">
+      {% for r in my_roommate_posts %}
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-center justify-between">
+        <div>
+          <h4 class="font-bold text-xs text-slate-800">{{ r.target_area }} (ميزانية {{ r.budget_max_egp }} ج.م)</h4>
+          <p class="text-[11px] text-slate-500 mt-0.5">{{ r.bio|truncatechars:80 }}</p>
+        </div>
+        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">نشط</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

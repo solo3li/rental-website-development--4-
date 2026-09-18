@@ -91,7 +91,7 @@
           </div>
           <div class="flex justify-between text-slate-600">
             <span>{{ t.estUtilities }}</span>
-            <span class="font-semibold text-slate-800">$210</span>
+            <span class="font-semibold text-slate-800">150 ج.م</span>
           </div>
           <div class="flex justify-between pt-2 border-t border-slate-200 text-sm font-bold text-slate-900">
             <span>{{ t.totalMonthly }}</span>
@@ -105,7 +105,7 @@
         <div class="flex items-center gap-3">
           <img id="modalAgentAvatar" src="" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 shadow-sm" />
           <div>
-            <div class="text-xs text-slate-400 font-semibold">{{ t.agentContact }}</div>
+            <div class="text-xs text-slate-400 font-semibold">المشرف / صاحب السكن</div>
             <div id="modalAgentName" class="font-bold text-slate-900 text-sm"></div>
             <div id="modalAgentPhone" class="text-xs text-slate-500"></div>
             <div id="modalAgentEmail" class="text-[11px] text-slate-400 truncate max-w-[160px]"></div>
@@ -129,7 +129,7 @@
           <i data-lucide="calendar" class="w-4 h-4 text-emerald-600"></i>
           <span>{{ t.bookTourTitle }}</span>
         </h4>
-        <p class="text-xs text-slate-500 mb-4">Choose between a live guided video walkthrough or an in-person viewing.</p>
+        <p class="text-xs text-slate-500 mb-4">اختر ما بين معاينة حضورية للشقة أو جولة فيديو مباشرة عبر واتساب.</p>
 
         <!-- Tour Success Alert -->
         <div id="tourSuccessAlert" class="hidden mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
@@ -144,18 +144,18 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">{{ t.fullName }}</label>
-              <input type="text" name="full_name" required placeholder="Alex Morgan" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <input type="text" name="full_name" required placeholder="محمد أحمد" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">{{ t.phone }}</label>
-              <input type="text" name="phone" required placeholder="+1 (555) 000-0000" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <input type="text" name="phone" required placeholder="01012345678" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">{{ t.email }}</label>
-              <input type="email" name="email" required placeholder="alex@example.com" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <input type="email" name="email" required placeholder="student@cairo.edu.eg" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">{{ t.tourDate }}</label>
@@ -203,80 +203,117 @@
     <form method="POST" action="/property/create/" class="p-6 overflow-y-auto space-y-4 text-xs">
       {% csrf_token %}
 
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">عنوان الإعلان السكني *</label>
+        {{ property_form.title_ar }}
+      </div>
+
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Title (English)</label>
-          {{ property_form.title }}
+          <label class="block font-bold text-slate-700 mb-1">نوع السكن الطلابي *</label>
+          {{ property_form.gender_policy }}
         </div>
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">العنوان (بالعربية)</label>
-          {{ property_form.title_ar }}
+          <label class="block font-bold text-slate-700 mb-1">نوع الإقامة والتأجير *</label>
+          {{ property_form.rental_type }}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">الإيجار الشهري (ج.م) *</label>
+          {{ property_form.price_egp }}
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">مبلغ التأمين (ج.م)</label>
+          {{ property_form.deposit_egp }}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">إجمالي سعة الأسِرّة بالسكن</label>
+          {{ property_form.total_capacity }}
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">عدد الأسِرّة المتاحة حالياً *</label>
+          {{ property_form.available_beds }}
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">{{ t.propertyType }}</label>
-          {{ property_form.property_type }}
+          <label class="block font-bold text-slate-700 mb-1">الجامعة الأقرب</label>
+          {{ property_form.university }}
         </div>
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">{{ t.listingMode }}</label>
-          {{ property_form.listing_type }}
+          <label class="block font-bold text-slate-700 mb-1">أقرب محطة مترو</label>
+          {{ property_form.nearest_metro }}
         </div>
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">{{ t.monthlyRent }} ($)</label>
-          {{ property_form.price }}
+          <label class="block font-bold text-slate-700 mb-1">وقت السير للجامعة (دقائق)</label>
+          {{ property_form.walking_minutes }}
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">{{ t.address }}</label>
-          {{ property_form.address }}
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">{{ t.city }}</label>
+          <label class="block font-bold text-slate-700 mb-1">المنطقة والحي *</label>
           {{ property_form.city }}
         </div>
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">{{ t.state }}</label>
-          {{ property_form.state }}
+          <label class="block font-bold text-slate-700 mb-1">العنوان التفصيلي / الشارع *</label>
+          {{ property_form.address }}
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-3">
+      <div class="flex flex-wrap items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+        <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+          {{ property_form.bills_included }}
+          <span>شامل الفواتير والنت</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+          {{ property_form.has_elevator }}
+          <span>يوجد مصعد (أسانسير)</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+          {{ property_form.study_desk }}
+          <span>مكتب مذاكرة</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+          {{ property_form.is_supervised }}
+          <span>أمن وإشراف</span>
+        </label>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">{{ t.beds }}</label>
-          {{ property_form.bedrooms }}
+          <label class="block font-bold text-slate-700 mb-1">اسم المالك / المشرف *</label>
+          {{ property_form.agent_name }}
         </div>
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">{{ t.baths }}</label>
-          {{ property_form.bathrooms }}
+          <label class="block font-bold text-slate-700 mb-1">رقم الهاتف *</label>
+          {{ property_form.agent_phone }}
         </div>
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">{{ t.sqft }}</label>
-          {{ property_form.area_sqft }}
+          <label class="block font-bold text-slate-700 mb-1">رقم الواتساب *</label>
+          {{ property_form.whatsapp_number }}
         </div>
       </div>
 
       <div>
-        <label class="block font-semibold text-slate-700 mb-1">{{ t.description }}</label>
-        {{ property_form.description }}
+        <label class="block font-bold text-slate-700 mb-1">وصف السكن والمميزات وقواعد الإقامة</label>
+        {{ property_form.description_ar }}
       </div>
 
       <div>
-        <label class="block font-semibold text-slate-700 mb-1">{{ t.selectImages }}</label>
+        <label class="block font-bold text-slate-700 mb-1">صور السكن (روابط مفصولة بفواصل)</label>
         {{ property_form.images_text }}
       </div>
 
-      <div>
-        <label class="block font-semibold text-slate-700 mb-1">{{ t.amenities }} (Comma separated)</label>
-        {{ property_form.amenities_text }}
-      </div>
-
-      <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md">
+      <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md">
         <i data-lucide="check" class="w-4 h-4"></i>
-        <span>Publish Listing</span>
+        <span>نشر السكن الطلابي الآن</span>
       </button>
     </form>
   </div>
@@ -289,9 +326,9 @@
       <div>
         <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
           <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
-          <span>{{ t.findAgent }}</span>
+          <span>منسقو ومشرفو السكن الطلابي بالقاهرة</span>
         </h3>
-        <p class="text-xs text-slate-500">Connect directly with our verified local property specialists.</p>
+        <p class="text-xs text-slate-500">تواصل مباشرة مع المشرفين المعتمدين لمناطق الجامعات المصرية.</p>
       </div>
       <button onclick="window.closeModal('agentsModal')" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100">
         <i data-lucide="x" class="w-5 h-5"></i>
@@ -299,48 +336,48 @@
     </div>
 
     <div class="space-y-3 mt-4">
-      <!-- Agent 1 -->
-      <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50 hover:bg-white transition">
-        <div class="flex items-center gap-3">
-          <img src="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=120&w=120" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-500" />
-          <div>
-            <div class="text-xs font-bold text-slate-900">Sarah Jenkins</div>
-            <div class="text-[11px] text-slate-500">Upstate NY Luxury & Villas</div>
-            <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">14 Active Listings</div>
-          </div>
-        </div>
-        <a href="tel:+15553921084" class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold hover:bg-emerald-50 hover:text-emerald-700 transition">
-          {{ t.callAgent }}
-        </a>
-      </div>
-
-      <!-- Agent 2 -->
+      <!-- Coordinator 1 -->
       <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50 hover:bg-white transition">
         <div class="flex items-center gap-3">
           <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=120&w=120" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-500" />
           <div>
-            <div class="text-xs font-bold text-slate-900">Marcus Vance</div>
-            <div class="text-[11px] text-slate-500">Suburban Family Estates</div>
-            <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">9 Active Listings</div>
+            <div class="text-xs font-bold text-slate-900">م. محمد عبد الرحمن</div>
+            <div class="text-[11px] text-slate-500">منسق سكن جامعة القاهرة، الدقي، وبين السرايات</div>
+            <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">١٢ شقة وسكن متاح للطلاب</div>
           </div>
         </div>
-        <a href="tel:+15557829901" class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold hover:bg-emerald-50 hover:text-emerald-700 transition">
-          {{ t.callAgent }}
+        <a href="https://wa.me/201012345678" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition">
+          واتساب
         </a>
       </div>
 
-      <!-- Agent 3 -->
+      <!-- Coordinator 2 -->
       <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50 hover:bg-white transition">
         <div class="flex items-center gap-3">
           <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=120&w=120" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-500" />
           <div>
-            <div class="text-xs font-bold text-slate-900">Elena Rostova</div>
-            <div class="text-[11px] text-slate-500">Manhattan & Brooklyn Penthouses</div>
-            <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">18 Active Listings</div>
+            <div class="text-xs font-bold text-slate-900">أ. منى السيد</div>
+            <div class="text-[11px] text-slate-500">مشرفة ومسؤولة سكن طالبات مدينة نصر وعين شمس</div>
+            <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">٨ عمائر سكن طالبات معتمدة</div>
           </div>
         </div>
-        <a href="tel:+15554412099" class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold hover:bg-emerald-50 hover:text-emerald-700 transition">
-          {{ t.callAgent }}
+        <a href="https://wa.me/201198765432" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition">
+          واتساب
+        </a>
+      </div>
+
+      <!-- Coordinator 3 -->
+      <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50 hover:bg-white transition">
+        <div class="flex items-center gap-3">
+          <img src="https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=120&w=120" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-500" />
+          <div>
+            <div class="text-xs font-bold text-slate-900">ك. أحمد الشريف</div>
+            <div class="text-[11px] text-slate-500">منسق إسكان التجمع الخامس وجامعات AUC و GUC</div>
+            <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">١٥ ستوديو وشقة مستقلة</div>
+          </div>
+        </div>
+        <a href="https://wa.me/201234567890" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition">
+          واتساب
         </a>
       </div>
     </div>

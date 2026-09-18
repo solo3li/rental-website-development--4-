@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models as gis_models
 from django.db import models
 from django.contrib.gis.geos import Point
+from django.contrib.auth.models import User
 
 class University(gis_models.Model):
     name = models.CharField(max_length=255)
@@ -163,6 +164,8 @@ class Property(gis_models.Model):
     whatsapp_number = models.CharField(max_length=50, default="+201012345678")
     agent_email = models.EmailField(default="contact@sakancairo.com")
     agent_avatar = models.URLField(default="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=120&w=120")
+    
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='owned_properties')
     
     lat = models.CharField(max_length=50, default="30.0276")
     lng = models.CharField(max_length=50, default="31.2089")
