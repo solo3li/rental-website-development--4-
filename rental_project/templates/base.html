@@ -78,12 +78,14 @@
       <!-- Right: User Auth, Language Toggle, Saved Drawer, Admin Link -->
       <div class="flex items-center gap-2 md:gap-2.5">
         
-        <!-- Add Housing Button (for landlords / owners) -->
+        <!-- Add Housing Button (Visible ONLY for Landlords / Property Owners) -->
+        {% if request.user.is_authenticated and request.user.profile.is_landlord %}
         <button onclick="window.openModal('addPropertyModal')"
           class="hidden sm:inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition shadow-xs cursor-pointer">
           <i data-lucide="plus" class="w-3.5 h-3.5"></i>
           <span>{% if is_ar %}أضف سكنك{% else %}List Housing{% endif %}</span>
         </button>
+        {% endif %}
 
         {% if request.user.is_authenticated %}
           <!-- User Profile Dropdown / Pill -->

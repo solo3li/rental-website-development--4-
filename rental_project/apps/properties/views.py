@@ -205,21 +205,22 @@ def property_detail(request, pk):
 def property_create(request):
     """Handle new student property submission from frontend modal"""
     if request.method == 'POST':
+        if not request.user.is_authenticated or not hasattr(request.user, 'profile') or not request.user.profile.is_landlord:
+            messages.error(request, "عفواً، إضافة ونشر سكن متاح فقط لحسابات أصحاب السكن والمؤجرين المعتمدين.")
+            return redirect('accounts:login')
+
         form = PropertyForm(request.POST)
         if form.is_valid():
             new_prop = form.save(commit=False)
-            if request.user.is_authenticated:
-                new_prop.owner = request.user
-                if hasattr(request.user, 'profile') and request.user.profile.phone:
-                    if not new_prop.agent_phone:
-                        new_prop.agent_phone = request.user.profile.phone
-                    if not new_prop.whatsapp_number:
-                        new_prop.whatsapp_number = request.user.profile.whatsapp or request.user.profile.phone
+            new_prop.owner = request.user
+            if hasattr(request.user, 'profile'):
+                if not new_prop.agent_phone:
+                    new_prop.agent_phone = getattr(request.user.profile, 'phone', '') or ''
+                if not new_prop.whatsapp_number:
+                    new_prop.whatsapp_number = getattr(request.user.profile, 'whatsapp', '') or getattr(request.user.profile, 'phone', '') or ''
             new_prop.save()
-            messages.success(request, f"تم إضافة السكن '{new_prop.title_ar or new_prop.title}' بنجاح!")
-            if request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.is_landlord:
-                return redirect('accounts:dashboard')
-            return redirect('/')
+            messages.success(request, f"تم نشر السكن '{new_prop.title_ar or new_prop.title}' بنجاح!")
+            return redirect('accounts:dashboard')
         else:
             messages.error(request, "يرجى تصحيح الأخطاء في النموذج والتأكد من ملء البيانات.")
     return redirect('/')
