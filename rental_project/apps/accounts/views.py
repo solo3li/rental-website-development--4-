@@ -80,38 +80,136 @@ def register_landlord_view(request):
     return render(request, 'accounts/register_landlord.html', {'form': form})
 
 
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+
+
 @login_required(login_url='/accounts/login/')
 def profile_view(request):
     user = request.user
     profile, _ = UserProfile.objects.get_or_create(user=user)
 
+    active_tab = request.GET.get('tab', 'account')
+    valid_tabs = ['account', 'tours', 'roommates', 'saved', 'security']
+    if active_tab not in valid_tabs:
+        active_tab = 'account'
+
+    password_form = PasswordChangeForm(user=user)
+
     if request.method == 'POST':
-        form = ProfileEditForm(request.POST, instance=profile)
-        if form.is_valid():
-            user.first_name = form.cleaned_data['first_name']
-            user.last_name = form.cleaned_data['last_name']
-            user.save()
-            form.save()
-            messages.success(request, "تم حفظ التعديلات بنجاح.")
-            return redirect('accounts:profile')
+        action = request.POST.get('action')
+        if action == 'change_password':
+            password_form = PasswordChangeForm(user=user, data=request.POST)
+            if password_form.is_valid():
+                updated_user = password_form.save()
+                update_session_auth_hash(request, updated_user)
+                messages.success(request, "تم تغيير كلمة المرور بنجاح!")
+                return redirect('/accounts/profile/?tab=security')
+            else:
+                active_tab = 'security'
+                messages.error(request, "يرجى تصحيح أخطاء كلمة المرور الموضحة أدناه.")
+                form = ProfileEditForm(instance=profile, initial={
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                })
+        else:
+            form = ProfileEditForm(request.POST, instance=profile)
+            if form.is_valid():
+                user.first_name = form.cleaned_data['first_name']
+                user.last_name = form.cleaned_data['last_name']
+                user.save()
+                form.save()
+                messages.success(request, "تم حفظ وتحديث بياناتك الشخصية بنجاح.")
+                return redirect('/accounts/profile/?tab=account')
+            else:
+                active_tab = 'account'
+                messages.error(request, "يرجى تصحيح الأخطاء في نموذج البيانات أدناه.")
     else:
         form = ProfileEditForm(instance=profile, initial={
             'first_name': user.first_name,
             'last_name': user.last_name,
         })
 
+    # Student's tour bookings (matched by email or phone)
+    tour_filter = Q(email__iexact=user.email)
+    if profile.phone:
+        tour_filter |= Q(phone=profile.phone)
+    my_tours = TourBooking.objects.filter(tour_filter).select_related('property', 'property__university').order_by('-created_at')
+    pending_tours_count = my_tours.filter(status='pending').count()
+    confirmed_tours_count = my_tours.filter(status='confirmed').count()
+
     # Student's roommate posts
-    my_roommate_posts = RoommatePost.objects.filter(contact_phone=profile.phone) if profile.phone else []
+    roommate_filter = Q()
+    if profile.phone:
+        roommate_filter |= Q(contact_phone=profile.phone) | Q(whatsapp_number=profile.phone)
+    if profile.whatsapp:
+        roommate_filter |= Q(contact_phone=profile.whatsapp) | Q(whatsapp_number=profile.whatsapp)
+    my_roommate_posts = RoommatePost.objects.filter(roommate_filter).order_by('-created_at') if (profile.phone or profile.whatsapp) else RoommatePost.objects.none()
+
     # Landlord's properties
-    my_properties = Property.objects.filter(agent_phone=profile.phone) if profile.phone else []
+    my_properties = Property.objects.filter(
+        Q(agent_phone=profile.phone) | Q(agent_email=user.email) | Q(owner=user)
+    ) if profile.is_landlord else []
 
     context = {
         'profile': profile,
         'form': form,
+        'password_form': password_form,
+        'active_tab': active_tab,
+        'my_tours': my_tours,
+        'pending_tours_count': pending_tours_count,
+        'confirmed_tours_count': confirmed_tours_count,
         'my_roommate_posts': my_roommate_posts,
         'my_properties': my_properties,
     }
     return render(request, 'accounts/profile.html', context)
+
+
+@login_required(login_url='/accounts/login/')
+def student_cancel_tour_view(request, booking_id):
+    if request.method == 'POST':
+        booking = get_object_or_404(TourBooking, pk=booking_id)
+        profile = getattr(request.user, 'profile', None)
+        is_owner = (booking.email.lower() == request.user.email.lower()) or (profile and profile.phone and booking.phone == profile.phone)
+        if is_owner:
+            booking.status = 'cancelled'
+            booking.save()
+            messages.success(request, "تم إلغاء طلب المعاينة بنجاح.")
+        else:
+            messages.error(request, "غير مصرح لك بإلغاء هذا الطلب.")
+    return redirect('/accounts/profile/?tab=tours')
+
+
+@login_required(login_url='/accounts/login/')
+def student_toggle_roommate_post_view(request, post_id):
+    if request.method == 'POST':
+        post = get_object_or_404(RoommatePost, pk=post_id)
+        profile = getattr(request.user, 'profile', None)
+        is_owner = (profile and profile.phone and (post.contact_phone == profile.phone or post.whatsapp_number == profile.phone)) or \
+                   (profile and profile.whatsapp and (post.whatsapp_number == profile.whatsapp or post.contact_phone == profile.whatsapp))
+        if is_owner:
+            post.is_active = not post.is_active
+            post.save()
+            msg = "تم تنشيط إعلان رفيق السكن بنجاح." if post.is_active else "تم إيقاف الإعلان (تم إيجاد رفيق السكن بنجاح)."
+            messages.success(request, msg)
+        else:
+            messages.error(request, "غير مصرح لك بتعديل هذا المنشور.")
+    return redirect('/accounts/profile/?tab=roommates')
+
+
+@login_required(login_url='/accounts/login/')
+def student_delete_roommate_post_view(request, post_id):
+    if request.method == 'POST':
+        post = get_object_or_404(RoommatePost, pk=post_id)
+        profile = getattr(request.user, 'profile', None)
+        is_owner = (profile and profile.phone and (post.contact_phone == profile.phone or post.whatsapp_number == profile.phone)) or \
+                   (profile and profile.whatsapp and (post.whatsapp_number == profile.whatsapp or post.contact_phone == profile.whatsapp))
+        if is_owner:
+            post.delete()
+            messages.success(request, "تم حذف إعلان رفيق السكن بنجاح.")
+        else:
+            messages.error(request, "غير مصرح لك بحذف هذا المنشور.")
+    return redirect('/accounts/profile/?tab=roommates')
 
 
 from django.http import JsonResponse

@@ -144,19 +144,58 @@ class UserLoginForm(forms.Form):
 
 
 class ProfileEditForm(forms.ModelForm):
-    first_name = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-xl border text-sm'}))
-    last_name = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-xl border text-sm'}))
+    first_name = forms.CharField(
+        max_length=50, required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400',
+            'placeholder': 'الاسم الأول'
+        })
+    )
+    last_name = forms.CharField(
+        max_length=50, required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400',
+            'placeholder': 'اسم العائلة'
+        })
+    )
 
     class Meta:
         model = UserProfile
-        fields = ['phone', 'whatsapp', 'avatar', 'university', 'faculty', 'academic_year', 'company_name', 'bio']
+        fields = ['phone', 'whatsapp', 'avatar', 'gender', 'university', 'faculty', 'academic_year', 'company_name', 'bio']
         widgets = {
-            'phone': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-xl border text-sm'}),
-            'whatsapp': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-xl border text-sm'}),
-            'avatar': forms.URLInput(attrs={'class': 'w-full px-4 py-2 rounded-xl border text-sm'}),
-            'university': forms.Select(attrs={'class': 'w-full px-4 py-2 rounded-xl border text-sm'}),
-            'faculty': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-xl border text-sm'}),
-            'academic_year': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-xl border text-sm'}),
-            'company_name': forms.TextInput(attrs={'class': 'w-full px-4 py-2 rounded-xl border text-sm'}),
-            'bio': forms.Textarea(attrs={'rows': 3, 'class': 'w-full px-4 py-2 rounded-xl border text-sm'}),
+            'phone': forms.TextInput(attrs={
+                'class': 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400',
+                'placeholder': '010XXXXXXXX'
+            }),
+            'whatsapp': forms.TextInput(attrs={
+                'class': 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400',
+                'placeholder': '010XXXXXXXX'
+            }),
+            'avatar': forms.URLInput(attrs={
+                'class': 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400',
+                'placeholder': 'https://...'
+            }),
+            'gender': forms.Select(attrs={
+                'class': 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400'
+            }),
+            'university': forms.Select(attrs={
+                'class': 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400'
+            }),
+            'faculty': forms.TextInput(attrs={
+                'class': 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400',
+                'placeholder': 'الكلية والتخصص (مثال: هندسة القاهرة)'
+            }),
+            'academic_year': forms.TextInput(attrs={
+                'class': 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400',
+                'placeholder': 'الفرقة الأولى / الثانية...'
+            }),
+            'company_name': forms.TextInput(attrs={
+                'class': 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400',
+                'placeholder': 'اسم الشركة أو المكتب'
+            }),
+            'bio': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-slate-400',
+                'placeholder': 'نبذة عنك...'
+            }),
         }
