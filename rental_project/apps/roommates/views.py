@@ -40,12 +40,24 @@ def roommate_list(request):
         form = RoommatePostForm(request.POST)
         if form.is_valid():
             post = form.save()
-            messages.success(request, 'تم نشر طلبك بنجاح! سيتمكن الطلاب المتوافقون معك من التواصل عبر واتساب والهاتف.')
+            messages.success(request, 'تم نشر طلبك بنجاح! سيتمكن الطلاب المتوافقون معك من التواصل معك مباشرة.')
             return redirect('roommates:list')
         else:
-            messages.error(request, 'يرجى التأكد من صحة البيانات المدخلة.')
+            messages.error(request, 'يرجى التأكد من صحة البيانات المدخلة في النموذج.')
     else:
-        form = RoommatePostForm()
+        initial_data = {}
+        if request.user.is_authenticated and hasattr(request.user, 'profile'):
+            p = request.user.profile
+            initial_data = {
+                'student_name': request.user.get_full_name() or request.user.username,
+                'gender': p.gender,
+                'university': p.university,
+                'faculty': p.faculty,
+                'academic_year': p.academic_year,
+                'contact_phone': p.phone,
+                'whatsapp_number': p.whatsapp or p.phone,
+            }
+        form = RoommatePostForm(initial=initial_data)
 
     context = {
         'posts': posts,
@@ -57,3 +69,17 @@ def roommate_list(request):
         'max_budget': max_budget or '',
     }
     return render(request, 'roommates/list.html', context)
+
+
+def roommate_detail(request, pk):
+    from django.shortcuts import get_object_or_404
+    post = get_object_or_404(RoommatePost.objects.select_related('university'), pk=pk)
+    similar_posts = RoommatePost.objects.filter(
+        gender=post.gender, is_active=True
+    ).exclude(pk=post.pk).select_related('university')[:3]
+
+    context = {
+        'post': post,
+        'similar_posts': similar_posts,
+    }
+    return render(request, 'roommates/detail.html', context)

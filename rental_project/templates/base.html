@@ -78,6 +78,14 @@
       <!-- Right: User Auth, Language Toggle, Saved Drawer, Admin Link -->
       <div class="flex items-center gap-2 md:gap-2.5">
         
+        <!-- Roommates Board Direct Link (Permanent on all screen sizes) -->
+        <a href="/roommates/"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition border border-slate-200/90 {% if request.resolver_match.app_name == 'roommates' %}bg-slate-900 text-white border-slate-900{% else %}bg-white hover:bg-slate-100 text-slate-700{% endif %}"
+          title="لوحة رفقاء السكن">
+          <i data-lucide="users" class="w-3.5 h-3.5 {% if request.resolver_match.app_name == 'roommates' %}text-emerald-400{% else %}text-emerald-600{% endif %}"></i>
+          <span class="hidden sm:inline">{% if is_ar %}رفقاء السكن{% else %}Roommates{% endif %}</span>
+        </a>
+
         <!-- Add Housing Button (Visible ONLY for Landlords / Property Owners) -->
         {% if request.user.is_authenticated and request.user.profile.is_landlord %}
         <button onclick="window.openModal('addPropertyModal')"
