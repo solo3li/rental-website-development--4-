@@ -1,0 +1,138 @@
+<div class="w-full max-w-7xl mx-auto px-4 lg:px-8 pt-6 pb-4">
+  <form method="GET" action="/" id="ssrFilterForm" class="flex flex-col gap-4">
+    <!-- Preserve Listing Type & View Mode -->
+    <input type="hidden" name="listing_type" value="{{ listing_type }}">
+    <input type="hidden" name="view" id="viewModeInput" value="{{ view_mode }}">
+
+    <!-- Top Row: Results Headline & Search Input -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900">
+          <span class="text-emerald-600">{{ count }}</span> {{ t.resultsIn }} New York
+        </h1>
+        <p class="text-xs text-slate-500 mt-0.5">
+          {% if listing_type == 'buy' %}Properties for sale with verified titles{% else %}Verified rental homes, apartments & villas{% endif %}
+        </p>
+      </div>
+
+      <!-- Search Input Container -->
+      <div class="relative w-full md:w-80 lg:w-96">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input
+          type="text"
+          name="search"
+          value="{{ search_query }}"
+          placeholder="{{ t.searchPlaceholder }}"
+          class="w-full pl-10 pr-20 py-2.5 rounded-full border border-slate-200/90 bg-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-2xs transition"
+        />
+        <button
+          type="submit"
+          class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-emerald-600 transition cursor-pointer">
+          {{ t.apply }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Row: Filter Dropdowns, Family Mode & View Toggle -->
+    <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+      
+      <!-- Filters Group -->
+      <div class="flex flex-wrap items-center gap-2">
+        
+        <!-- Price Range Filter -->
+        <div class="relative">
+          <select name="price_range" onchange="document.getElementById('ssrFilterForm').submit()"
+            class="appearance-none bg-white border border-slate-200/90 hover:border-slate-300 text-slate-700 text-xs font-semibold py-2 pl-3.5 pr-8 rounded-full shadow-2xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+            <option value="all" {% if price_range == 'all' %}selected{% endif %}>{{ t.anyPrice }}</option>
+            {% if listing_type == 'buy' %}
+              <option value="<150k" {% if price_range == '<150k' %}selected{% endif %}>&lt; $150k</option>
+              <option value="150k-300k" {% if price_range == '150k-300k' %}selected{% endif %}>$150k - $300k</option>
+              <option value="300k-500k" {% if price_range == '300k-500k' %}selected{% endif %}>$300k - $500k</option>
+              <option value="500k+" {% if price_range == '500k+' %}selected{% endif %}>$500k+</option>
+            {% else %}
+              <option value="<2000" {% if price_range == '<2000' %}selected{% endif %}>&lt; $2,000</option>
+              <option value="2000-3000" {% if price_range == '2000-3000' %}selected{% endif %}>$2,000 - $3,000</option>
+              <option value="3000-4000" {% if price_range == '3000-4000' %}selected{% endif %}>$3,000 - $4,000</option>
+              <option value="4000+" {% if price_range == '4000+' %}selected{% endif %}>$4,000+</option>
+            {% endif %}
+          </select>
+          <i data-lucide="chevron-down" class="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"></i>
+        </div>
+
+        <!-- Bedrooms Filter -->
+        <div class="relative">
+          <select name="bedrooms" onchange="document.getElementById('ssrFilterForm').submit()"
+            class="appearance-none bg-white border border-slate-200/90 hover:border-slate-300 text-slate-700 text-xs font-semibold py-2 pl-3.5 pr-8 rounded-full shadow-2xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+            <option value="all" {% if bedrooms == 'all' %}selected{% endif %}>{{ t.allBeds }}</option>
+            <option value="1" {% if bedrooms == '1' %}selected{% endif %}>{{ t.bed1 }}</option>
+            <option value="2-4" {% if bedrooms == '2-4' %}selected{% endif %}>{{ t.beds2to4 }}</option>
+            <option value="5+" {% if bedrooms == '5+' %}selected{% endif %}>{{ t.beds5plus }}</option>
+          </select>
+          <i data-lucide="chevron-down" class="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"></i>
+        </div>
+
+        <!-- Property Types Filter -->
+        <div class="relative">
+          <select name="property_type" onchange="document.getElementById('ssrFilterForm').submit()"
+            class="appearance-none bg-white border border-slate-200/90 hover:border-slate-300 text-slate-700 text-xs font-semibold py-2 pl-3.5 pr-8 rounded-full shadow-2xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+            <option value="all" {% if property_type == 'all' %}selected{% endif %}>{{ t.allTypes }}</option>
+            <option value="House" {% if property_type == 'House' %}selected{% endif %}>{{ t.houses }}</option>
+            <option value="Apartment" {% if property_type == 'Apartment' %}selected{% endif %}>{{ t.apartments }}</option>
+            <option value="Villa" {% if property_type == 'Villa' %}selected{% endif %}>{{ t.villas }}</option>
+            <option value="Townhouse" {% if property_type == 'Townhouse' %}selected{% endif %}>{{ t.townhouses }}</option>
+            <option value="Studio" {% if property_type == 'Studio' %}selected{% endif %}>{{ t.studios }}</option>
+          </select>
+          <i data-lucide="chevron-down" class="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"></i>
+        </div>
+
+        <!-- Family Mode Toggle Button -->
+        <label class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border cursor-pointer select-none transition {% if family_mode %}bg-amber-50 border-amber-200 text-amber-800 shadow-xs{% else %}bg-white border-slate-200/90 text-slate-700 hover:bg-slate-50{% endif %}">
+          <input type="checkbox" name="family_mode" value="true" {% if family_mode %}checked{% endif %} onchange="document.getElementById('ssrFilterForm').submit()" class="hidden">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 {% if family_mode %}text-amber-600{% else %}text-slate-400{% endif %}"></i>
+          <span class="text-xs font-semibold">{{ t.familyMode }}</span>
+        </label>
+
+        <!-- Reset Filters Link -->
+        {% if search_query or property_type != 'all' or bedrooms != 'all' or price_range != 'all' or family_mode %}
+        <a href="/?listing_type={{ listing_type }}" class="px-3 py-1.5 text-xs text-rose-600 hover:text-rose-700 font-semibold flex items-center gap-1">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          <span>{{ t.resetFilters }}</span>
+        </a>
+        {% endif %}
+
+      </div>
+
+      <!-- Right Controls: Sort & Map Toggle -->
+      <div class="flex items-center gap-2">
+        
+        <!-- Sort Dropdown -->
+        <div class="relative">
+          <select name="sort" onchange="document.getElementById('ssrFilterForm').submit()"
+            class="appearance-none bg-white border border-slate-200/90 text-slate-700 text-xs font-semibold py-2 pl-3.5 pr-8 rounded-full shadow-2xs cursor-pointer focus:outline-none">
+            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>{{ t.sortNewest }}</option>
+            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>{{ t.sortPriceAsc }}</option>
+            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>{{ t.sortPriceDesc }}</option>
+            <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>{{ t.sortPopular }}</option>
+          </select>
+          <i data-lucide="chevron-down" class="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"></i>
+        </div>
+
+        <!-- View Switcher (Grid vs Map) -->
+        <div class="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200/60">
+          <button type="button" onclick="document.getElementById('viewModeInput').value='grid'; document.getElementById('ssrFilterForm').submit()"
+            class="p-1.5 rounded-full transition cursor-pointer {% if view_mode != 'map' %}bg-white text-slate-900 shadow-xs{% else %}text-slate-500 hover:text-slate-900{% endif %}"
+            title="Grid View">
+            <i data-lucide="grid" class="w-4 h-4"></i>
+          </button>
+          <button type="button" onclick="document.getElementById('viewModeInput').value='map'; document.getElementById('ssrFilterForm').submit()"
+            class="p-1.5 rounded-full transition cursor-pointer {% if view_mode == 'map' %}bg-white text-slate-900 shadow-xs{% else %}text-slate-500 hover:text-slate-900{% endif %}"
+            title="Map View">
+            <i data-lucide="map" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </form>
+</div>

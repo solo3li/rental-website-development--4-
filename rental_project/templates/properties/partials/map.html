@@ -1,0 +1,66 @@
+<div class="relative w-full h-[620px] rounded-3xl overflow-hidden border border-slate-200/80 shadow-md bg-slate-100 select-none">
+  
+  <!-- Map Canvas Background (SVG Grid) -->
+  <div id="mapBackground" class="absolute inset-0 w-full h-full bg-[#E2E8F0] transition-colors duration-300">
+    <!-- SVG Vector Map Graphic -->
+    <svg class="w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#94A3B8" stroke-width="0.8" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid)" />
+      
+      <!-- Major roads / rivers graphic paths -->
+      <path d="M 0 150 Q 300 200 600 120 T 1200 350" fill="none" stroke="#64748B" stroke-width="4" opacity="0.6" />
+      <path d="M 200 0 Q 350 300 500 650" fill="none" stroke="#0284C7" stroke-width="8" opacity="0.4" />
+      <path d="M 700 0 Q 650 300 900 650" fill="none" stroke="#16A34A" stroke-width="3" opacity="0.3" />
+    </svg>
+  </div>
+
+  <!-- Interactive Pins Layer -->
+  <div id="interactiveMapCanvas" class="absolute inset-0 w-full h-full pointer-events-auto">
+    <!-- Rendered dynamically by JavaScript with calculated relative coordinates -->
+  </div>
+
+  <!-- Map Controls (Top Right) -->
+  <div class="absolute top-4 right-4 flex flex-col gap-2 z-20">
+    <!-- Layer Toggle (Satellite / Standard) -->
+    <button onclick="toggleMapStyle()"
+      class="w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-md shadow-md border border-slate-200/80 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition cursor-pointer"
+      title="Toggle Map Style">
+      <i data-lucide="layers" class="w-5 h-5"></i>
+    </button>
+    
+    <!-- Recenter / Target -->
+    <button onclick="window.initInteractiveMap(window.allPropertiesData)"
+      class="w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-md shadow-md border border-slate-200/80 flex items-center justify-center text-slate-700 hover:text-emerald-600 transition cursor-pointer"
+      title="Center Map">
+      <i data-lucide="navigation" class="w-5 h-5"></i>
+    </button>
+  </div>
+
+  <!-- Bottom Left Legend / Stats -->
+  <div class="absolute bottom-4 left-4 z-20 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-200 shadow-md flex items-center gap-3">
+    <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span>{{ count }} Properties on Map</span>
+    </div>
+    <span class="text-slate-300">|</span>
+    <span class="text-xs text-slate-500 font-medium">PostGIS Spatial Sync</span>
+  </div>
+
+</div>
+
+<script>
+  let isSatellite = false;
+  function toggleMapStyle() {
+    isSatellite = !isSatellite;
+    const bg = document.getElementById("mapBackground");
+    if (bg) {
+      bg.className = isSatellite 
+        ? "absolute inset-0 w-full h-full bg-[#1E293B] transition-colors duration-300"
+        : "absolute inset-0 w-full h-full bg-[#E2E8F0] transition-colors duration-300";
+    }
+  }
+</script>

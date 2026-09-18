@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- SSR Filter Bar with Query Parameters -->
+{% include 'properties/partials/filter_bar.html' %}
+
+<!-- Main Content Area: Grid vs Map -->
+<div class="max-w-7xl mx-auto px-4 lg:px-8 pb-16">
+  
+  {% if view_mode == 'map' %}
+    <!-- Map View Container -->
+    <div class="mt-2">
+      {% include 'properties/partials/map.html' %}
+    </div>
+  {% else %}
+    <!-- Grid View -->
+    {% if count == 0 %}
+      <!-- Empty State -->
+      <div class="bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-xs max-w-lg mx-auto my-12">
+        <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4 text-slate-400">
+          <i data-lucide="search-x" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-1">{{ t.noResults }}</h3>
+        <p class="text-xs text-slate-500 mb-6">{{ t.tryResetting }}</p>
+        <a href="/?listing_type={{ listing_type }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition shadow-sm">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span>{{ t.resetFilters }}</span>
+        </a>
+      </div>
+    {% else %}
+      <!-- Properties Grid (Responsive 1 -> 2 -> 3 columns) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+        {% for p in properties %}
+          {% include 'properties/partials/card.html' with p=p p_json=properties_json %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endif %}
+
+</div>
+
+<!-- Data Bootstrap Script for Map, Saved Drawer and Modals -->
+<script>
+  window.allPropertiesData = {{ properties_json|safe }};
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    // If Map View is active, render interactive pins
+    {% if view_mode == 'map' %}
+      if (window.initInteractiveMap) {
+        window.initInteractiveMap(window.allPropertiesData);
+      }
+    {% endif %}
+
+    // If a property was requested in query parameter, open its detail modal
+    {% if selected_property %}
+      const initialProp = window.allPropertiesData.find(p => p.id === {{ selected_property.id }});
+      if (initialProp && window.openPropertyDetail) {
+        window.openPropertyDetail(initialProp);
+      }
+    {% endif %}
+  });
+</script>
+{% endblock %}
