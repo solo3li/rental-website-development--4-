@@ -190,14 +190,35 @@ def global_context(request):
     if lang in ['en', 'ar']:
         request.session['lang'] = lang
     else:
-        lang = request.session.get('lang', 'en')
+        lang = request.session.get('lang', 'ar')
 
     direction = 'rtl' if lang == 'ar' else 'ltr'
-    t = TRANSLATIONS.get(lang, TRANSLATIONS['en'])
+    t = TRANSLATIONS.get(lang, TRANSLATIONS['ar'])
+
+    # Global Forms for Modals across all views
+    property_form = None
+    tour_form = None
+    try:
+        from apps.properties.forms import PropertyForm
+        from apps.tours.forms import TourBookingForm
+
+        init_prop = {}
+        if request.user.is_authenticated:
+            init_prop['agent_name'] = request.user.get_full_name() or request.user.username
+            if hasattr(request.user, 'profile'):
+                init_prop['agent_phone'] = getattr(request.user.profile, 'phone', '') or ''
+                init_prop['whatsapp_number'] = getattr(request.user.profile, 'whatsapp', '') or getattr(request.user.profile, 'phone', '') or ''
+
+        property_form = PropertyForm(initial=init_prop)
+        tour_form = TourBookingForm()
+    except Exception:
+        pass
 
     return {
         'current_lang': lang,
         'direction': direction,
         'is_ar': lang == 'ar',
         't': t,
+        'property_form': property_form,
+        'tour_form': tour_form,
     }

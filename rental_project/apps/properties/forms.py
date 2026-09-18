@@ -17,6 +17,30 @@ class PropertyForm(forms.ModelForm):
             'class': 'w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs'
         })
     )
+    floor_number = forms.IntegerField(
+        required=False,
+        initial=1,
+        widget=forms.NumberInput(attrs={'class': 'w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 text-xs', 'placeholder': '1'})
+    )
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 2, 'class': 'w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 text-xs', 'placeholder': 'English description (optional)'})
+    )
+    deposit_egp = forms.DecimalField(
+        required=False,
+        initial=0,
+        widget=forms.NumberInput(attrs={'class': 'w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 text-xs', 'placeholder': '1000'})
+    )
+    total_capacity = forms.IntegerField(
+        required=False,
+        initial=4,
+        widget=forms.NumberInput(attrs={'class': 'w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 text-xs', 'placeholder': '4'})
+    )
+    walking_minutes = forms.IntegerField(
+        required=False,
+        initial=10,
+        widget=forms.NumberInput(attrs={'class': 'w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 text-xs', 'placeholder': '10'})
+    )
 
     class Meta:
         model = Property

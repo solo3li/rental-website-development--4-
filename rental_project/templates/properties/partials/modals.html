@@ -188,133 +188,205 @@
 </div>
 
 <!-- 2. Add Property Modal -->
-<div id="addPropertyModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
-  <div class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden my-auto max-h-[90vh] flex flex-col">
-    <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-white">
-      <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-        <i data-lucide="plus-circle" class="w-5 h-5 text-emerald-600"></i>
-        <span>{{ t.listNewProperty }}</span>
-      </h3>
-      <button onclick="window.closeModal('addPropertyModal')" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+<div id="addPropertyModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+  <div class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden my-auto max-h-[92vh] flex flex-col">
+    
+    <!-- Modal Header -->
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-20 shadow-2xs">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/80 shadow-2xs">
+          <i data-lucide="building-2" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
+            <span>إضافة سكن طلابي جديد</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">سكن القاهرة</span>
+          </h3>
+          <p class="text-xs text-slate-500">أعلن عن شقة أو غرفة أو سرير متاح للطلاب في محيط الجامعات ومحطات المترو.</p>
+        </div>
+      </div>
+      <button onclick="window.closeModal('addPropertyModal')" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
     </div>
 
-    <form method="POST" action="/property/create/" class="p-6 overflow-y-auto space-y-4 text-xs">
+    <!-- Modal Form -->
+    <form method="POST" action="/property/create/" class="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs">
       {% csrf_token %}
 
-      <div>
-        <label class="block font-bold text-slate-700 mb-1">عنوان الإعلان السكني *</label>
-        {{ property_form.title_ar }}
-      </div>
+      <!-- Section 1: Basic Info & Housing Type -->
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-3">
+        <div class="flex items-center gap-1.5 font-bold text-slate-800 text-xs pb-1 border-b border-slate-200/50">
+          <i data-lucide="home" class="w-4 h-4 text-emerald-600"></i>
+          <span>1. بيانات الإعلان ونوع السكن</span>
+        </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label class="block font-bold text-slate-700 mb-1">نوع السكن الطلابي *</label>
-          {{ property_form.gender_policy }}
+          <label class="block font-bold text-slate-700 mb-1">عنوان الإعلان السكني *</label>
+          {{ property_form.title_ar }}
         </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">نوع الإقامة والتأجير *</label>
-          {{ property_form.rental_type }}
-        </div>
-      </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">الإيجار الشهري (ج.م) *</label>
-          {{ property_form.price_egp }}
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">مبلغ التأمين (ج.م)</label>
-          {{ property_form.deposit_egp }}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">نوع السكن الطلابي *</label>
+            {{ property_form.gender_policy }}
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">نوع الإقامة والتأجير *</label>
+            {{ property_form.rental_type }}
+          </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">إجمالي سعة الأسِرّة بالسكن</label>
-          {{ property_form.total_capacity }}
+      <!-- Section 2: Pricing & Bed Capacity -->
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-3">
+        <div class="flex items-center gap-1.5 font-bold text-slate-800 text-xs pb-1 border-b border-slate-200/50">
+          <i data-lucide="banknote" class="w-4 h-4 text-emerald-600"></i>
+          <span>2. الأسعار وسعة الأسِرّة المتاحة</span>
         </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">عدد الأسِرّة المتاحة حالياً *</label>
-          {{ property_form.available_beds }}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">الإيجار الشهري (ج.م) *</label>
+            {{ property_form.price_egp }}
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">مبلغ التأمين (ج.م)</label>
+            {{ property_form.deposit_egp }}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">إجمالي سعة الأسِرّة بالسكن</label>
+            {{ property_form.total_capacity }}
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">عدد الأسِرّة المتاحة حالياً للحجز *</label>
+            {{ property_form.available_beds }}
+          </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">الجامعة الأقرب</label>
-          {{ property_form.university }}
+      <!-- Section 3: Proximity to Universities & Metro -->
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-3">
+        <div class="flex items-center gap-1.5 font-bold text-slate-800 text-xs pb-1 border-b border-slate-200/50">
+          <i data-lucide="graduation-cap" class="w-4 h-4 text-emerald-600"></i>
+          <span>3. الموقع والقرب من الجامعة والمترو</span>
         </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">أقرب محطة مترو</label>
-          {{ property_form.nearest_metro }}
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">الجامعة الأقرب</label>
+            {{ property_form.university }}
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">أقرب محطة مترو</label>
+            {{ property_form.nearest_metro }}
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">وقت السير للجامعة (دقائق)</label>
+            {{ property_form.walking_minutes }}
+          </div>
         </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">وقت السير للجامعة (دقائق)</label>
-          {{ property_form.walking_minutes }}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">المنطقة والحي *</label>
+            {{ property_form.city }}
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">العنوان التفصيلي / الشارع *</label>
+            {{ property_form.address }}
+          </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">المنطقة والحي *</label>
-          {{ property_form.city }}
+      <!-- Section 4: Amenities & Curfew -->
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-3">
+        <div class="flex items-center gap-1.5 font-bold text-slate-800 text-xs pb-1 border-b border-slate-200/50">
+          <i data-lucide="sparkles" class="w-4 h-4 text-emerald-600"></i>
+          <span>4. التجهيزات والخدمات وقواعد السكن</span>
         </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">العنوان التفصيلي / الشارع *</label>
-          {{ property_form.address }}
-        </div>
-      </div>
 
-      <div class="flex flex-wrap items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
-        <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-          {{ property_form.bills_included }}
-          <span>شامل الفواتير والنت</span>
-        </label>
-        <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-          {{ property_form.has_elevator }}
-          <span>يوجد مصعد (أسانسير)</span>
-        </label>
-        <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-          {{ property_form.study_desk }}
-          <span>مكتب مذاكرة</span>
-        </label>
-        <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-          {{ property_form.is_supervised }}
-          <span>أمن وإشراف</span>
-        </label>
-      </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-emerald-400 transition">
+            {{ property_form.bills_included }}
+            <span class="font-bold text-slate-700 text-[11px]">فواتير مشمولة</span>
+          </label>
+          <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-emerald-400 transition">
+            {{ property_form.has_elevator }}
+            <span class="font-bold text-slate-700 text-[11px]">يوجد مصعد</span>
+          </label>
+          <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-emerald-400 transition">
+            {{ property_form.study_desk }}
+            <span class="font-bold text-slate-700 text-[11px]">مكتب مذاكرة</span>
+          </label>
+          <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-emerald-400 transition">
+            {{ property_form.is_supervised }}
+            <span class="font-bold text-slate-700 text-[11px]">أمن وإشراف</span>
+          </label>
+        </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">اسم المالك / المشرف *</label>
-          {{ property_form.agent_name }}
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">رقم الهاتف *</label>
-          {{ property_form.agent_phone }}
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">رقم الواتساب *</label>
-          {{ property_form.whatsapp_number }}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">سرعة الإنترنت المتوفر</label>
+            {{ property_form.wifi_speed }}
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">ميعاد غلق الباب الخارجي</label>
+            {{ property_form.curfew_time }}
+          </div>
         </div>
       </div>
 
-      <div>
-        <label class="block font-bold text-slate-700 mb-1">وصف السكن والمميزات وقواعد الإقامة</label>
-        {{ property_form.description_ar }}
+      <!-- Section 5: Owner / Supervisor Contact Details -->
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-3">
+        <div class="flex items-center gap-1.5 font-bold text-slate-800 text-xs pb-1 border-b border-slate-200/50">
+          <i data-lucide="phone-call" class="w-4 h-4 text-emerald-600"></i>
+          <span>5. بيانات صاحب السكن / المشرف المسؤول</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">اسم المشرف / المالك *</label>
+            {{ property_form.agent_name }}
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">رقم الهاتف *</label>
+            {{ property_form.agent_phone }}
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">رقم الواتساب (للتواصل الفوري) *</label>
+            {{ property_form.whatsapp_number }}
+          </div>
+        </div>
       </div>
 
-      <div>
-        <label class="block font-bold text-slate-700 mb-1">صور السكن (روابط مفصولة بفواصل)</label>
-        {{ property_form.images_text }}
+      <!-- Section 6: Description & Photos -->
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-3">
+        <div class="flex items-center gap-1.5 font-bold text-slate-800 text-xs pb-1 border-b border-slate-200/50">
+          <i data-lucide="file-text" class="w-4 h-4 text-emerald-600"></i>
+          <span>6. الوصف وقواعد الإقامة وصور السكن</span>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">وصف السكن ومواصفات الغرف *</label>
+          {{ property_form.description_ar }}
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">صور السكن (روابط صور مفصولة بفواصل)</label>
+          {{ property_form.images_text }}
+        </div>
       </div>
 
-      <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md">
-        <i data-lucide="check" class="w-4 h-4"></i>
-        <span>نشر السكن الطلابي الآن</span>
-      </button>
+      <div class="pt-2">
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-extrabold text-sm transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-700/20 transform hover:scale-[1.01]">
+          <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+          <span>نشر السكن الطلابي الآن</span>
+        </button>
+      </div>
     </form>
   </div>
 </div>
