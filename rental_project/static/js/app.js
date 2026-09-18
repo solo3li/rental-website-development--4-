@@ -318,28 +318,36 @@ document.addEventListener("DOMContentLoaded", function () {
         container.innerHTML = `
           <div class="text-center py-12 text-slate-400">
             <i data-lucide="heart" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
-            <p class="text-sm">You haven't saved any rental properties yet.</p>
+            <p class="text-sm font-semibold text-slate-600">لم تقم بحفظ أي سكن في المفضلة بعد.</p>
+            <p class="text-xs text-slate-400 mt-1">اضغط على أيقونة القلب في أي إعلان لحفظه هنا والرجوع إليه لاحقاً.</p>
           </div>
         `;
       } else {
-        container.innerHTML = savedList.map(p => `
-          <div class="flex items-center gap-3 p-3 rounded-2xl border border-slate-200/80 hover:border-slate-300 bg-white transition cursor-pointer"
-            onclick='window.openPropertyDetail(${JSON.stringify(p)})'>
-            <img src="${p.images[0]}" class="w-16 h-16 rounded-xl object-cover shrink-0" />
+        container.innerHTML = savedList.map(p => {
+          const priceVal = Number(p.price_egp || p.price || 0);
+          const imgSrc = (p.images && p.images.length > 0) ? p.images[0] : 'https://images.pexels.com/photos/1454806/pexels-photo-1454806.jpeg';
+          const title = p.title_ar || p.title || 'سكن طلاب';
+          const location = p.city || 'القاهرة';
+
+          return `
+          <div class="flex items-center gap-3 p-3 rounded-2xl border border-slate-200/80 hover:border-emerald-300 hover:shadow-xs bg-white transition cursor-pointer"
+            onclick="window.openPropertyDetailById(${p.id})">
+            <img src="${imgSrc}" class="w-16 h-16 rounded-xl object-cover shrink-0" alt="${title}" />
             <div class="flex-1 min-w-0">
-              <h4 class="text-xs font-semibold text-slate-800 truncate">${p.title}</h4>
-              <p class="text-[11px] text-slate-500">${p.city}, ${p.state}</p>
-              <div class="text-xs font-bold text-emerald-600 mt-1">$${p.price.toLocaleString()}/mo</div>
+              <h4 class="text-xs font-bold text-slate-800 truncate">${title}</h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">${location}</p>
+              <div class="text-xs font-extrabold text-emerald-600 mt-1">${priceVal.toLocaleString()} ج.م / شهر</div>
             </div>
-            <button onclick="event.stopPropagation(); window.toggleSaveProperty(${p.id});" class="p-2 text-red-500 hover:bg-red-50 rounded-xl">
-              <i data-lucide="x" class="w-4 h-4"></i>
+            <button onclick="event.stopPropagation(); window.toggleSaveProperty(${p.id});" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition cursor-pointer" title="حذف من المفضلة">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
-        `).join('');
+          `;
+        }).join('');
       }
       if (window.lucide) window.lucide.createIcons();
     } catch (e) {
-      console.error(e);
+      console.error("Error in renderSavedDrawer:", e);
     }
   };
 });
