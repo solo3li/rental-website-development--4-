@@ -125,6 +125,10 @@ def landlord_dashboard(request):
         messages.warning(request, "هذه الصفحة مخصصة لحسابات أصحاب السكن والمؤجرين فقط.")
         return redirect('accounts:profile')
 
+    active_tab = request.GET.get('tab', 'overview')
+    if active_tab not in ['overview', 'listings', 'tours', 'financials']:
+        active_tab = 'overview'
+
     # Fetch properties associated with this landlord
     properties = Property.objects.filter(
         Q(agent_phone=profile.phone) | Q(agent_email=user.email) | Q(owner=user)
@@ -143,11 +147,30 @@ def landlord_dashboard(request):
     avg_price = int(sum((p.price_egp or 0) for p in properties) / total_properties) if total_properties > 0 else 0
 
     # Tour requests for these properties
-    tour_bookings = TourBooking.objects.filter(property__in=properties).select_related('property').order_by('-created_at')[:20]
+    all_tours_qs = TourBooking.objects.filter(property__in=properties)
+    pending_tours_count = all_tours_qs.filter(status='pending').count()
+    tour_bookings = all_tours_qs.select_related('property').order_by('-created_at')[:50]
+
+    # Per-property financial breakdown for financials tab
+    properties_stats = []
+    for p in properties:
+        occ = max(0, p.total_capacity - p.available_beds)
+        rev = occ * (p.price_egp or 0)
+        max_rev = (p.total_capacity or 0) * (p.price_egp or 0)
+        rate = int((occ / p.total_capacity * 100)) if p.total_capacity > 0 else 0
+        properties_stats.append({
+            'prop': p,
+            'occupied': occ,
+            'revenue': rev,
+            'max_revenue': max_rev,
+            'rate': rate,
+        })
 
     context = {
         'profile': profile,
         'properties': properties,
+        'properties_stats': properties_stats,
+        'active_tab': active_tab,
         'total_properties': total_properties,
         'total_capacity': total_capacity,
         'total_available_beds': total_available_beds,
@@ -157,6 +180,7 @@ def landlord_dashboard(request):
         'occupancy_rate': occupancy_rate,
         'avg_price': avg_price,
         'tour_bookings': tour_bookings,
+        'pending_tours_count': pending_tours_count,
     }
     return render(request, 'accounts/dashboard.html', context)
 
@@ -170,7 +194,7 @@ def update_beds_view(request, property_id):
         is_owner = (prop.owner == request.user) or (profile and profile.phone and prop.agent_phone == profile.phone) or (prop.agent_email == request.user.email)
         if not is_owner:
             messages.error(request, "غير مصرح لك بتعديل هذا السكن.")
-            return redirect('accounts:dashboard')
+            return redirect('/accounts/dashboard/?tab=listings')
 
         try:
             delta = int(request.POST.get('delta', 0))
@@ -190,7 +214,7 @@ def update_beds_view(request, property_id):
             return JsonResponse({'success': True, 'available_beds': prop.available_beds, 'total_capacity': prop.total_capacity})
 
         messages.success(request, f"تم تحديث الأسِرّة المتاحة لسكن '{prop.title_ar or prop.title}' إلى {prop.available_beds} سرير.")
-    return redirect('/accounts/dashboard/#listings')
+    return redirect('/accounts/dashboard/?tab=listings')
 
 
 @login_required(login_url='/accounts/login/')
@@ -203,10 +227,10 @@ def update_tour_status_view(request, booking_id):
             is_owner = (prop.owner == request.user) or (profile and profile.phone and prop.agent_phone == profile.phone) or (prop.agent_email == request.user.email)
             if not is_owner:
                 messages.error(request, "غير مصرح لك بتحديث حالة هذا الطلب.")
-                return redirect('accounts:dashboard')
+                return redirect('/accounts/dashboard/?tab=tours')
         new_status = request.POST.get('status')
         if new_status in dict(TourBooking.STATUS_CHOICES):
             booking.status = new_status
             booking.save()
             messages.success(request, f"تم تحديث حالة طلب المعاينة بنجاح.")
-    return redirect('/accounts/dashboard/#tours')
+    return redirect('/accounts/dashboard/?tab=tours')
