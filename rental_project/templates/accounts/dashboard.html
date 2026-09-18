@@ -8,94 +8,99 @@
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
 
-  <!-- Dashboard Top Welcome Banner -->
-  <div class="bg-gradient-to-r from-slate-900 via-emerald-950 to-teal-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
-    <div>
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold mb-2">
-        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-        <span>بوابة إدارة الإسكان الطلابي</span>
+  <!-- 1. Calm, Minimalist Top Welcome Header (No gradients) -->
+  <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="space-y-1">
+      <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">
+        <i data-lucide="building" class="w-3.5 h-3.5 text-slate-500"></i>
+        <span>لوحة تحكم السكن</span>
       </div>
-      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">
+      <h1 class="text-xl sm:text-2xl font-bold text-slate-900">
         مرحباً، {{ user.get_full_name|default:user.username }}
       </h1>
-      <p class="text-xs text-slate-300 mt-1">
-        تابع إشغال الأسِرّة، أضف شقق وسكن جديد، واستقبل طلبات واستفسارات الطلاب في القاهرة.
+      <p class="text-xs text-slate-500">
+        إدارة إعلانات السكن الطلابي ومتابعة إشغال الأسِرّة وطلبات المعاينة في القاهرة.
       </p>
     </div>
 
-    <!-- Quick Add Property Trigger -->
-    <div class="flex items-center gap-3">
+    <!-- Header Actions -->
+    <div class="flex items-center gap-2 self-stretch sm:self-auto">
       <button onclick="window.openModal('addPropertyModal')"
-        class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-md transform hover:scale-[1.02] cursor-pointer">
-        <i data-lucide="plus-circle" class="w-4 h-4"></i>
-        <span>أضف سكن طلاب جديد</span>
+        class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition cursor-pointer shadow-2xs">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        <span>إضافة سكن جديد</span>
       </button>
-      <a href="/accounts/profile/" class="p-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition" title="تعديل الملف">
-        <i data-lucide="settings" class="w-5 h-5"></i>
+
+      <a href="/accounts/profile/"
+        class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition"
+        title="الملف الشخصي">
+        <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+        <span>تعديل الحساب</span>
       </a>
     </div>
   </div>
 
-  <!-- Stats Grid -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <!-- 2. Calm Stats Overview -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     
-    <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
-      <div class="flex items-center justify-between text-slate-400 mb-2">
-        <span class="text-xs font-bold">العقارات المعروضة</span>
-        <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-          <i data-lucide="home" class="w-4 h-4"></i>
+    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1.5">
+        <span class="text-xs font-medium text-slate-500">العقارات المعروضة</span>
+        <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i>
         </div>
       </div>
-      <div class="text-2xl font-black text-slate-900">{{ total_properties }}</div>
-      <span class="text-[10px] text-slate-400">عقار / شقة طلابية</span>
+      <div class="text-2xl font-bold text-slate-900">{{ total_properties }}</div>
+      <span class="text-[11px] text-slate-400">إعلان سكن نشط</span>
     </div>
 
-    <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
-      <div class="flex items-center justify-between text-slate-400 mb-2">
-        <span class="text-xs font-bold">إجمالي سعة الأسِرّة</span>
-        <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-          <i data-lucide="bed" class="w-4 h-4"></i>
+    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1.5">
+        <span class="text-xs font-medium text-slate-500">إجمالي سعة الأسِرّة</span>
+        <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+          <i data-lucide="bed" class="w-3.5 h-3.5"></i>
         </div>
       </div>
-      <div class="text-2xl font-black text-slate-900">{{ total_capacity }}</div>
-      <span class="text-[10px] text-slate-400">طاقة استيعابية للطلاب</span>
+      <div class="text-2xl font-bold text-slate-900">{{ total_capacity }}</div>
+      <span class="text-[11px] text-slate-400">طاقة استيعابية للطلاب</span>
     </div>
 
-    <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
-      <div class="flex items-center justify-between text-slate-400 mb-2">
-        <span class="text-xs font-bold">الأسِرّة المتاحة حالياً</span>
-        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
+    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1.5">
+        <span class="text-xs font-medium text-slate-500">الأسِرّة المتاحة حالياً</span>
+        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+          <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
         </div>
       </div>
-      <div class="text-2xl font-black text-emerald-600">{{ total_available_beds }}</div>
-      <span class="text-[10px] text-slate-400">سرير شاغر جاهز للتأجير</span>
+      <div class="text-2xl font-bold text-emerald-700">{{ total_available_beds }}</div>
+      <span class="text-[11px] text-slate-400">سرير شاغر جاهز للحجز</span>
     </div>
 
-    <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
-      <div class="flex items-center justify-between text-slate-400 mb-2">
-        <span class="text-xs font-bold">الأسِرّة المحجوزة</span>
-        <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-          <i data-lucide="check-circle" class="w-4 h-4"></i>
+    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1.5">
+        <span class="text-xs font-medium text-slate-500">الأسِرّة المشغولة</span>
+        <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+          <i data-lucide="users" class="w-3.5 h-3.5"></i>
         </div>
       </div>
-      <div class="text-2xl font-black text-slate-700">{{ occupied_beds }}</div>
-      <span class="text-[10px] text-slate-400">طالب مقيم حالياً</span>
+      <div class="text-2xl font-bold text-slate-800">{{ occupied_beds }}</div>
+      <span class="text-[11px] text-slate-400">طالب مقيم</span>
     </div>
 
   </div>
 
-  <!-- Landlord Properties List -->
-  <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-md mb-8">
-    <div class="flex items-center justify-between mb-6 pb-3 border-b border-slate-100">
+  <!-- 3. Landlord Properties Table / List -->
+  <div class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs mb-6 overflow-hidden">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
-          <i data-lucide="building" class="w-4 h-4"></i>
+        <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+          <i data-lucide="list" class="w-3.5 h-3.5"></i>
         </div>
-        <h2 class="text-base font-bold text-slate-900">سكنك المعروض في المنصة</h2>
+        <h2 class="text-sm font-bold text-slate-900">سكنك المعروض في المنصة</h2>
       </div>
+
       <button onclick="window.openModal('addPropertyModal')"
-        class="text-xs font-bold text-emerald-600 hover:underline flex items-center gap-1 cursor-pointer">
+        class="text-xs font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-1 cursor-pointer">
         <i data-lucide="plus" class="w-3.5 h-3.5"></i>
         <span>إضافة سكن جديد</span>
       </button>
@@ -105,49 +110,53 @@
     <div class="overflow-x-auto">
       <table class="w-full text-xs text-right">
         <thead>
-          <tr class="text-slate-400 border-b border-slate-100 pb-2">
-            <th class="pb-3 pr-2">السكن</th>
-            <th class="pb-3">النوع</th>
-            <th class="pb-3">الإيجار</th>
-            <th class="pb-3">الأسِرّة المتاحة</th>
-            <th class="pb-3">الجامعة / المنطقة</th>
-            <th class="pb-3 text-left pl-2">إجراءات</th>
+          <tr class="text-slate-500 border-b border-slate-100 bg-slate-50/50">
+            <th class="py-3 pr-5 font-semibold">السكن</th>
+            <th class="py-3 px-3 font-semibold">نوع السكن</th>
+            <th class="py-3 px-3 font-semibold">الإيجار الشهري</th>
+            <th class="py-3 px-3 font-semibold">الأسِرّة المتاحة</th>
+            <th class="py-3 px-3 font-semibold">الجامعة / المنطقة</th>
+            <th class="py-3 pl-5 text-left font-semibold">الإجراءات</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
           {% for p in properties %}
-          <tr class="hover:bg-slate-50 transition">
-            <td class="py-3.5 pr-2">
+          <tr class="hover:bg-slate-50/70 transition">
+            <td class="py-3.5 pr-5">
               <div class="flex items-center gap-3">
-                <img src="{{ p.primary_image }}" class="w-12 h-10 rounded-xl object-cover" />
-                <div>
-                  <a href="/properties/{{ p.id }}/" class="font-bold text-slate-900 hover:text-emerald-600 transition block">
+                <img src="{{ p.primary_image }}" class="w-12 h-10 rounded-lg object-cover bg-slate-100 border border-slate-200/60 shrink-0" alt="{{ p.title }}" />
+                <div class="min-w-0">
+                  <a href="/property/{{ p.id }}/" class="font-bold text-slate-900 hover:underline block truncate max-w-xs">
                     {{ p.title_ar|default:p.title }}
                   </a>
-                  <span class="text-[11px] text-slate-400">{{ p.address }}</span>
+                  <span class="text-[11px] text-slate-400 block truncate">{{ p.address }}</span>
                 </div>
               </div>
             </td>
-            <td class="py-3.5">
+            <td class="py-3.5 px-3">
               {% if p.gender_policy == 'female_only' %}
-              <span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[10px] font-bold">طالبات</span>
+              <span class="inline-block px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium">سكن طالبات</span>
+              {% elif p.gender_policy == 'male_only' %}
+              <span class="inline-block px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium">سكن طلاب</span>
               {% else %}
-              <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">طلاب</span>
+              <span class="inline-block px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium">متاح للجميع</span>
               {% endif %}
             </td>
-            <td class="py-3.5 font-bold text-emerald-700">
-              {{ p.price_egp }} ج.م/شهر
+            <td class="py-3.5 px-3 font-bold text-slate-900">
+              {{ p.price_egp }} ج.م
             </td>
-            <td class="py-3.5">
-              <span class="font-bold text-slate-800">{{ p.available_beds }}</span> / {{ p.total_capacity }} سرير
+            <td class="py-3.5 px-3">
+              <span class="font-bold text-slate-900">{{ p.available_beds }}</span>
+              <span class="text-slate-400">من أصل {{ p.total_capacity }}</span>
             </td>
-            <td class="py-3.5 text-slate-600">
+            <td class="py-3.5 px-3 text-slate-600">
               {{ p.university.name_ar|default:p.city }}
             </td>
-            <td class="py-3.5 text-left pl-2">
-              <a href="/properties/{{ p.id }}/" class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition">
-                <span>معاينة الإعلان</span>
-                <i data-lucide="external-link" class="w-3 h-3"></i>
+            <td class="py-3.5 pl-5 text-left">
+              <a href="/property/{{ p.id }}/"
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition">
+                <span>معاينة</span>
+                <i data-lucide="arrow-up-left" class="w-3 h-3"></i>
               </a>
             </td>
           </tr>
@@ -156,34 +165,43 @@
       </table>
     </div>
     {% else %}
-    <div class="text-center py-10">
-      <i data-lucide="home" class="w-10 h-10 text-slate-300 mx-auto mb-2"></i>
-      <p class="text-xs text-slate-500 mb-3">لم تقم بإضافة أي سكن حتى الآن.</p>
-      <button onclick="window.openModal('addPropertyModal')" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs">أضف أول سكن الآن</button>
+    <div class="text-center py-12 px-4">
+      <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2.5">
+        <i data-lucide="home" class="w-5 h-5"></i>
+      </div>
+      <p class="text-xs font-semibold text-slate-700 mb-1">لم تقم بإضافة أي سكن حتى الآن</p>
+      <p class="text-[11px] text-slate-400 mb-4">أضف شققك أو غرفك المتاحة للطلاب لبدء استقبال الطلبات.</p>
+      <button onclick="window.openModal('addPropertyModal')"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition cursor-pointer">
+        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+        <span>إضافة أول سكن</span>
+      </button>
     </div>
     {% endif %}
   </div>
 
-  <!-- Student Tour Requests for this Landlord -->
+  <!-- 4. Student Tour Requests -->
   {% if tour_bookings %}
-  <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-md">
-    <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-      <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
-        <i data-lucide="calendar" class="w-4 h-4"></i>
+  <div class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+    <div class="p-5 border-b border-slate-100 flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
       </div>
-      <h2 class="text-base font-bold text-slate-900">طلبات المعاينة الطلابية الأخيرة</h2>
+      <h2 class="text-sm font-bold text-slate-900">طلبات المعاينة الطلابية</h2>
     </div>
 
-    <div class="space-y-3">
+    <div class="p-5 space-y-3">
       {% for b in tour_bookings %}
-      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+      <div class="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
         <div>
           <div class="font-bold text-slate-900">{{ b.full_name }} — {{ b.property.title_ar|default:b.property.title }}</div>
           <div class="text-slate-500 mt-0.5">موعد المعاينة: <strong>{{ b.tour_date }}</strong> ({{ b.get_tour_type_display }})</div>
-          {% if b.message %}<div class="text-slate-600 italic mt-1">"{{ b.message }}"</div>{% endif %}
+          {% if b.message %}
+          <div class="text-slate-600 italic mt-1 text-[11px]">"{{ b.message }}"</div>
+          {% endif %}
         </div>
         <div class="flex items-center gap-2">
-          <a href="tel:{{ b.phone }}" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold flex items-center gap-1">
+          <a href="tel:{{ b.phone }}" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-[11px] transition flex items-center gap-1">
             <i data-lucide="phone" class="w-3 h-3"></i>
             <span>{{ b.phone }}</span>
           </a>
