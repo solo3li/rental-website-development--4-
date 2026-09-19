@@ -420,7 +420,12 @@
                   {% elif b.status == 'pending' %}
                   <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-amber-50 text-amber-800 font-semibold text-xs border border-amber-200">
                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                    <span>قيد مراجعة المالك</span>
+                    <span>قيد مراجعة العربون والموعد</span>
+                  </span>
+                  {% elif b.status == 'rejected' %}
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-rose-50 text-rose-700 font-bold text-xs border border-rose-200">
+                    <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                    <span>تم رفض الطلب / الإيصال</span>
                   </span>
                   {% elif b.status == 'completed' %}
                   <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-100 text-slate-600 font-semibold text-xs">
@@ -432,6 +437,49 @@
                   </span>
                   {% endif %}
                 </div>
+
+                <!-- Deposit Receipt Information Card -->
+                {% if b.deposit_receipt %}
+                <div class="w-full mt-2 p-2.5 rounded-lg bg-white border border-slate-200/80 text-slate-600 text-[11px] space-y-1.5 text-right">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-semibold text-slate-700 flex items-center gap-1">
+                      <span>💰 عربون الحجز:</span>
+                      <strong class="text-slate-900">{{ b.deposit_receipt.amount }} ج.م</strong>
+                    </span>
+                    
+                    {% if b.deposit_receipt.status == 'approved' %}
+                    <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">إيصال معتمد ✅</span>
+                    {% elif b.deposit_receipt.status == 'rejected' %}
+                    <span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-bold text-[10px]">إيصال مرفوض ❌</span>
+                    {% else %}
+                    <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[10px]">قيد التدقيق ⏳</span>
+                    {% endif %}
+                  </div>
+
+                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-slate-500 text-[10.5px]">
+                    <span>وسيلة الدفع: <strong class="text-slate-700">{{ b.deposit_receipt.get_payment_method_display }}</strong></span>
+                    {% if b.deposit_receipt.sender_info %}
+                    <span>المحول: <strong class="text-slate-700">{{ b.deposit_receipt.sender_info }}</strong></span>
+                    {% endif %}
+                    {% if b.deposit_receipt.reference_number %}
+                    <span>الرقم المرجعي: <strong class="text-slate-700">{{ b.deposit_receipt.reference_number }}</strong></span>
+                    {% endif %}
+                    {% if b.deposit_receipt.receipt_image %}
+                    <a href="{{ b.deposit_receipt.receipt_image.url }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-bold underline inline-flex items-center gap-0.5">
+                      <span>عرض الإيصال</span>
+                      <i data-lucide="external-link" class="w-3 h-3"></i>
+                    </a>
+                    {% endif %}
+                  </div>
+
+                  {% if b.deposit_receipt.status == 'rejected' and b.deposit_receipt.rejection_reason %}
+                  <div class="p-2 rounded bg-rose-50 border border-rose-200 text-rose-800 text-[11px] mt-1 leading-relaxed">
+                    <strong>سبب رفض الإيصال:</strong> {{ b.deposit_receipt.rejection_reason }}
+                    <div class="text-[10px] text-rose-600 mt-0.5">يمكنك حجز موعد جديد أو التواصل مع إدارة المنصة للاستفسار.</div>
+                  </div>
+                  {% endif %}
+                </div>
+                {% endif %}
 
                 <!-- Landlord Contact Buttons -->
                 {% if b.property and b.status != 'cancelled' %}

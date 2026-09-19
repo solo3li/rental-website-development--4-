@@ -215,6 +215,13 @@ def global_context(request):
         import logging
         logging.getLogger(__name__).warning("Error initializing modal forms in global_context: %s", e)
 
+    payment_settings = None
+    try:
+        from apps.tours.models import PaymentSettings
+        payment_settings = PaymentSettings.get_settings()
+    except Exception:
+        pass
+
     return {
         'current_lang': lang,
         'direction': direction,
@@ -222,4 +229,5 @@ def global_context(request):
         't': t,
         'property_form': property_form,
         'tour_form': tour_form,
+        'payment_settings': payment_settings,
     }

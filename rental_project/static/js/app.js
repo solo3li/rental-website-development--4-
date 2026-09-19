@@ -207,6 +207,46 @@ document.addEventListener("DOMContentLoaded", function () {
     window.updateSavedCount();
   };
 
+  // Copy payment account text (InstaPay / Vodafone Cash)
+  window.copyPaymentText = function (text, btn) {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      const span = btn.querySelector("span");
+      const original = span ? span.textContent : "";
+      if (span) span.textContent = "تم النسخ ✓";
+      btn.classList.add("text-emerald-600");
+      setTimeout(() => {
+        if (span) span.textContent = original;
+        btn.classList.remove("text-emerald-600");
+      }, 2000);
+    }).catch(err => {
+      console.error("Clipboard copy failed:", err);
+    });
+  };
+
+  // Preview uploaded receipt image
+  window.previewReceiptImage = function (input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const previewImg = document.getElementById("receiptPreviewImg");
+        const fileName = document.getElementById("receiptFileName");
+        const placeholder = document.getElementById("receiptUploadPlaceholder");
+        const container = document.getElementById("receiptPreviewContainer");
+
+        if (previewImg) previewImg.src = e.target.result;
+        if (fileName) fileName.textContent = file.name;
+        if (placeholder) placeholder.classList.add("hidden");
+        if (container) {
+          container.classList.remove("hidden");
+          container.classList.add("flex");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Tour Booking Form AJAX & Confetti
   const tourForm = document.getElementById("tourBookingForm");
   if (tourForm) {
@@ -216,7 +256,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const submitBtn = tourForm.querySelector("button[type='submit']");
       const originalText = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = "Booking...";
+      submitBtn.innerHTML = "جاري إرسال الطلب وإيصال السداد...";
 
       fetch("/tours/book/?format=json", {
         method: "POST",
@@ -240,18 +280,30 @@ document.addEventListener("DOMContentLoaded", function () {
           }
           const successBox = document.getElementById("tourSuccessAlert");
           if (successBox) {
+            if (data.message) {
+              const msgSpan = successBox.querySelector("span");
+              if (msgSpan) msgSpan.textContent = data.message;
+            }
             successBox.classList.remove("hidden");
-            setTimeout(() => { successBox.classList.add("hidden"); }, 5000);
+            setTimeout(() => { successBox.classList.add("hidden"); }, 6000);
           }
           tourForm.reset();
+          const placeholder = document.getElementById("receiptUploadPlaceholder");
+          const container = document.getElementById("receiptPreviewContainer");
+          if (placeholder) placeholder.classList.remove("hidden");
+          if (container) {
+            container.classList.add("hidden");
+            container.classList.remove("flex");
+          }
         } else {
-          alert("Please fill all required fields properly.");
+          alert(data.message || "يرجى التأكد من ملء الحقول المطلوبة وإرفاق صورة إيصال التحويل بشكل صحيح.");
         }
       })
       .catch(err => {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
         console.error(err);
+        alert("حدث خطأ أثناء الاتصال بالخادم، يرجى المحاولة مرة أخرى.");
       });
     });
   }
