@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+export DJANGO_SETTINGS_MODULE="config.settings"
+
 echo "=== [1/3] Running Django migrations ==="
 python manage.py migrate --noinput
 
