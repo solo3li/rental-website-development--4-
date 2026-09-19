@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from apps.properties.models import University
+from apps.core.i18n import _bi
 
 class UserProfile(models.Model):
     USER_TYPES = [
@@ -45,8 +46,8 @@ class UserProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "User Profile"
-        verbose_name_plural = "User Profiles"
+        verbose_name = _bi("ملف مستخدم", "User Profile")
+        verbose_name_plural = _bi("ملفات المستخدمين", "User Profiles")
 
     def __str__(self):
         role = "طالب" if self.user_type == 'student' else "صاحب سكن"

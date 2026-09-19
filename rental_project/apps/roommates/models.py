@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from apps.properties.models import University
+from apps.core.i18n import _bi
 
 class RoommatePost(models.Model):
     GENDER_CHOICES = [
@@ -40,8 +41,8 @@ class RoommatePost(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ النشر")
 
     class Meta:
-        verbose_name = "Roommate Post"
-        verbose_name_plural = "Roommate Posts"
+        verbose_name = _bi("إعلان زميل سكن", "Roommate Post")
+        verbose_name_plural = _bi("إعلانات زملاء السكن", "Roommate Posts")
         ordering = ['-created_at']
 
     def __str__(self):

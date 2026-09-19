@@ -173,7 +173,7 @@ def run_clean_admin_tests():
     assert_test('title="عرض حساب المستخدم في لوحة التحكم"' in html_rm or '(@' in html_rm, "ربط الحساب المسجل ببروفايله في الأدمن")
 
     # 10. Bilingual Support & Language Switcher (AR & EN)
-    print("\n[10] التحقق من دعم اللغتين العربية والإنجليزية وزر التبديل السريع...")
+    print("\n[10] التحقق من دعم اللغتين العربية والإنجليزية وتغيير السايدبار بالكامل...")
     # A) Check Arabic interface by default
     res_ar = client.get('/admin/')
     assert_test(res_ar.status_code == 200, "استجابة لوحة التحكم باللغة العربية")
@@ -181,6 +181,10 @@ def run_clean_admin_tests():
     assert_test('سكن طلاب القاهرة — لوحة الإدارة' in html_ar, "ظهور عنوان اللوحة بالعربية")
     assert_test('مؤشرات منصة سكن الطلاب' in html_ar, "ظهور شريط المؤشرات بالعربية")
     assert_test('🌐 English' in html_ar, "ظهور زر التبديل إلى الإنجليزية (🌐 English)")
+    assert_test('سكن الطلاب والعقارات' in html_ar, "ظهور تطبيق سكن الطلاب بالعربية في السايدبار")
+    assert_test('حجوزات المعاينة والعربون' in html_ar, "ظهور تطبيق حجوزات المعاينة بالعربية في السايدبار")
+    assert_test('إعلانات زملاء السكن' in html_ar, "ظهور تطبيق زملاء السكن بالعربية في السايدبار")
+    assert_test('الحسابات والملفات الشخصية' in html_ar, "ظهور تطبيق الحسابات بالعربية في السايدبار")
 
     # B) Switch language to English via set_language
     res_setlang = client.post('/i18n/setlang/', {'language': 'en', 'next': '/admin/'})
@@ -193,6 +197,10 @@ def run_clean_admin_tests():
     assert_test('Cairo Student Housing — Admin Panel' in html_en, "ظهور عنوان اللوحة بالإنجليزية")
     assert_test('Student Housing Platform Metrics' in html_en, "ظهور شريط المؤشرات بالإنجليزية")
     assert_test('🌐 العربية' in html_en, "ظهور زر التبديل إلى العربية (🌐 العربية)")
+    assert_test('Properties &amp; Housing' in html_en or 'Properties' in html_en, "ظهور تطبيق العقارات بالإنجليزية في السايدبار")
+    assert_test('Tours &amp; Deposit' in html_en or 'Tours' in html_en, "ظهور تطبيق الحجوزات بالإنجليزية في السايدبار")
+    assert_test('Roommate Matching' in html_en, "ظهور تطبيق زملاء السكن بالإنجليزية في السايدبار")
+    assert_test('Accounts &amp; User Profiles' in html_en or 'Accounts' in html_en, "ظهور تطبيق الحسابات بالإنجليزية في السايدبار")
 
     # D) Verify RoommatePost table in English
     res_rm_en = client.get('/admin/roommates/roommatepost/')

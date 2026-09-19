@@ -2,6 +2,7 @@ from django.contrib.gis.db import models as gis_models
 from django.db import models
 from django.contrib.gis.geos import Point
 from django.contrib.auth.models import User
+from apps.core.i18n import _bi
 
 class University(gis_models.Model):
     name = models.CharField(max_length=255)
@@ -16,8 +17,8 @@ class University(gis_models.Model):
     website = models.URLField(blank=True, null=True)
 
     class Meta:
-        verbose_name = "University"
-        verbose_name_plural = "Universities"
+        verbose_name = _bi("جامعة", "University")
+        verbose_name_plural = _bi("الجامعات", "Universities")
         ordering = ['name_ar']
 
     def __str__(self):
@@ -50,8 +51,8 @@ class MetroStation(gis_models.Model):
     location = gis_models.PointField(srid=4326, geography=True, null=True, blank=True)
 
     class Meta:
-        verbose_name = "Metro Station"
-        verbose_name_plural = "Metro Stations"
+        verbose_name = _bi("محطة مترو", "Metro Station")
+        verbose_name_plural = _bi("محطات المترو", "Metro Stations")
         ordering = ['name_ar']
 
     def __str__(self):
@@ -233,6 +234,11 @@ class Property(gis_models.Model):
         import urllib.parse
         encoded_text = urllib.parse.quote(text)
         return f"https://wa.me/{clean_number}?text={encoded_text}"
+
+    class Meta:
+        verbose_name = _bi("سكن طالب / عقار", "Property")
+        verbose_name_plural = _bi("سكن الطلاب والعقارات", "Properties")
+        ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.title} ({self.city}) - {self.get_gender_display_ar()}"

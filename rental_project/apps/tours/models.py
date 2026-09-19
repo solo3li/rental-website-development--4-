@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from apps.properties.models import Property
+from apps.core.i18n import _bi
 
 class TourBooking(models.Model):
     TOUR_TYPES = [
@@ -40,8 +41,8 @@ class TourBooking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Tour Booking"
-        verbose_name_plural = "Tour Bookings"
+        verbose_name = _bi("حجز معاينة", "Tour Booking")
+        verbose_name_plural = _bi("حجوزات المعاينات", "Tour Bookings")
         ordering = ['-created_at']
 
     def __str__(self):
@@ -65,8 +66,8 @@ class PaymentSettings(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Payment Setting"
-        verbose_name_plural = "Payment Settings"
+        verbose_name = _bi("إعدادات الدفع المركزية", "Payment Setting")
+        verbose_name_plural = _bi("إعدادات الدفع المركزية", "Payment Settings")
 
     def __str__(self):
         state = "مفعل" if self.is_deposit_required else "معطل"
@@ -113,8 +114,8 @@ class DepositReceipt(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الرفع")
 
     class Meta:
-        verbose_name = "Deposit Receipt"
-        verbose_name_plural = "Deposit Receipts"
+        verbose_name = _bi("إيصال عربون", "Deposit Receipt")
+        verbose_name_plural = _bi("إيصالات العربون", "Deposit Receipts")
         ordering = ['-created_at']
 
     def __str__(self):
