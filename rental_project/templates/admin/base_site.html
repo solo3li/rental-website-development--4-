@@ -10,6 +10,19 @@
 
 {% block extrahead %}
     {{ block.super }}
+    <script>
+        // Polyfill/Shim for Chromium Permissions Policy:
+        // Transparently map legacy 'unload' listener in RelatedObjectLookups.js to modern 'pagehide'
+        (function() {
+            var orig = window.addEventListener;
+            window.addEventListener = function(event, fn, opts) {
+                if (event === 'unload') {
+                    return orig.call(window, 'pagehide', fn, opts);
+                }
+                return orig.call(window, event, fn, opts);
+            };
+        })();
+    </script>
     <style>
         /* Minimalist tweaks: Ensure badges and action buttons never wrap vertically */
         .status-badge, .badge-clean {
