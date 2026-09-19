@@ -39,7 +39,10 @@ def roommate_list(request):
     if request.method == 'POST':
         form = RoommatePostForm(request.POST)
         if form.is_valid():
-            post = form.save()
+            post = form.save(commit=False)
+            if request.user.is_authenticated:
+                post.user = request.user
+            post.save()
             messages.success(request, 'تم نشر طلبك بنجاح! سيتمكن الطلاب المتوافقون معك من التواصل معك مباشرة.')
             return redirect('roommates:list')
         else:

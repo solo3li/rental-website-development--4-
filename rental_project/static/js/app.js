@@ -256,31 +256,47 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Interactive Map Rendering (Matching InteractiveMap.tsx Canvas)
+  // Interactive Map Rendering (Cairo Coordinates & EGP Student Housing)
   window.initInteractiveMap = function (properties) {
     const mapContainer = document.getElementById("interactiveMapCanvas");
     if (!mapContainer || !properties || properties.length === 0) return;
 
-    const lats = properties.map(p => parseFloat(p.lat) || 40.7);
-    const lngs = properties.map(p => parseFloat(p.lng) || -74.0);
+    const validProps = properties.filter(p => p.lat && p.lng && !isNaN(parseFloat(p.lat)) && !isNaN(parseFloat(p.lng)));
+    if (validProps.length === 0) return;
 
-    const minLat = Math.min(...lats, 40.5);
-    const maxLat = Math.max(...lats, 43.5);
-    const minLng = Math.min(...lngs, -79.0);
-    const maxLng = Math.max(...lngs, -73.5);
+    const lats = validProps.map(p => parseFloat(p.lat));
+    const lngs = validProps.map(p => parseFloat(p.lng));
+
+    // Calculate dynamic bounding box around Cairo student housing properties
+    let minLat = Math.min(...lats);
+    let maxLat = Math.max(...lats);
+    let minLng = Math.min(...lngs);
+    let maxLng = Math.max(...lngs);
+
+    // Add padding around coordinates for clean visual framing
+    const latSpan = maxLat - minLat || 0.05;
+    const lngSpan = maxLng - minLng || 0.05;
+    minLat -= latSpan * 0.15;
+    maxLat += latSpan * 0.15;
+    minLng -= lngSpan * 0.15;
+    maxLng += lngSpan * 0.15;
 
     const getCoordinates = (latStr, lngStr) => {
-      const lat = parseFloat(latStr) || 41.5;
-      const lng = parseFloat(lngStr) || -75.0;
-      const x = ((lng - minLng) / (maxLng - minLng || 1)) * 75 + 12;
-      const y = 88 - ((lat - minLat) / (maxLat - minLat || 1)) * 75;
-      return { x: Math.max(10, Math.min(90, x)), y: Math.max(12, Math.min(88, y)) };
+      const lat = parseFloat(latStr);
+      const lng = parseFloat(lngStr);
+      const x = ((lng - minLng) / (maxLng - minLng || 1)) * 76 + 12;
+      const y = 88 - ((lat - minLat) / (maxLat - minLat || 1)) * 76;
+      return { x: Math.max(8, Math.min(92, x)), y: Math.max(10, Math.min(90, y)) };
     };
 
-    mapContainer.innerHTML = properties.map(p => {
+    mapContainer.innerHTML = validProps.map(p => {
       const coords = getCoordinates(p.lat, p.lng);
-      const isBuy = p.listing_type === "buy";
-      const priceTag = isBuy ? `$${(p.buy_price || 150000) / 1000}k` : `$${p.price || 2000}`;
+      const priceVal = Number(p.price_egp || p.price || 0);
+      const priceTag = `${priceVal.toLocaleString()} ج.م`;
+      const title = p.title_ar || p.title || 'سكن طلاب';
+      const imgSrc = (p.images && p.images.length > 0) ? p.images[0] : 'https://images.pexels.com/photos/1454806/pexels-photo-1454806.jpeg';
+      const dist = p.distance_to_university || '';
+      const rentalDisplay = p.rental_type_display || '';
 
       return `
         <div class="absolute cursor-pointer transition-transform duration-200 hover:scale-110 hover:z-30 group"
@@ -292,11 +308,12 @@ document.addEventListener("DOMContentLoaded", function () {
             <span>${priceTag}</span>
           </div>
 
-          <!-- Hover Card Preview -->
-          <div class="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 bg-white rounded-2xl p-2 shadow-2xl border border-slate-100 z-40">
-            <img src="${p.images[0]}" class="w-full h-24 object-cover rounded-xl mb-1.5" />
-            <div class="text-[11px] font-semibold text-slate-800 truncate">${p.title}</div>
-            <div class="text-[10px] text-slate-500">${p.city}, ${p.state}</div>
+          <!-- Hover Card Preview (Arabic RTL) -->
+          <div class="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 bg-white rounded-2xl p-2.5 shadow-2xl border border-slate-100 z-40 text-right" dir="rtl">
+            <img src="${imgSrc}" class="w-full h-24 object-cover rounded-xl mb-2" alt="${title}" />
+            <div class="text-xs font-bold text-slate-900 truncate">${title}</div>
+            <div class="text-[11px] text-emerald-600 font-bold mt-0.5">${rentalDisplay}</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">${p.city} ${dist ? '• ' + dist : ''}</div>
           </div>
         </div>
       `;

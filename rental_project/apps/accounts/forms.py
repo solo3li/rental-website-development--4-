@@ -1,3 +1,4 @@
+import secrets
 from django import forms
 from django.contrib.auth.models import User
 from .models import UserProfile
@@ -55,7 +56,7 @@ class StudentRegisterForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.username = self.cleaned_data['email'].split('@')[0] + "_" + User.objects.make_random_password(4)
+        user.username = self.cleaned_data['email'].split('@')[0] + "_" + secrets.token_hex(2)
         user.set_password(self.cleaned_data['password'])
         if commit:
             user.save()
@@ -118,7 +119,7 @@ class LandlordRegisterForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.username = self.cleaned_data['email'].split('@')[0] + "_" + User.objects.make_random_password(4)
+        user.username = self.cleaned_data['email'].split('@')[0] + "_" + secrets.token_hex(2)
         user.set_password(self.cleaned_data['password'])
         if commit:
             user.save()

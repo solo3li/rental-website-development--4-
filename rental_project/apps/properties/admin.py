@@ -99,7 +99,7 @@ class PropertyAdmin(gis_admin.GISModelAdmin):
         }),
         ('بيانات التواصل والتأجير', {
             'fields': (
-                ('agent_name', 'phone_number'),
+                ('agent_name', 'agent_phone'),
                 ('whatsapp_number', 'agent_email'),
                 'agent_avatar',
             )

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from apps.properties.models import University
 
 class RoommatePost(models.Model):
@@ -7,6 +8,14 @@ class RoommatePost(models.Model):
         ('male', 'طالب (سكن شباب)'),
     ]
 
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='roommate_posts',
+        verbose_name="حساب الطالب المسجل"
+    )
     student_name = models.CharField(max_length=150, verbose_name="اسم الطالب/الطالبة")
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='female', verbose_name="النوع")
     university = models.ForeignKey(

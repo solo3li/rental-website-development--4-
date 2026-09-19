@@ -7,7 +7,10 @@ def book_tour(request):
     if request.method == 'POST':
         form = TourBookingForm(request.POST)
         if form.is_valid():
-            booking = form.save()
+            booking = form.save(commit=False)
+            if request.user.is_authenticated:
+                booking.user = request.user
+            booking.save()
             msg = "Tour Request Confirmed! The agent will contact you shortly."
             if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
                 return JsonResponse({'success': True, 'message': msg, 'booking_id': booking.id})

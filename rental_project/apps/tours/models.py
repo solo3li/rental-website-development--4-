@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from apps.properties.models import Property
 
 class TourBooking(models.Model):
@@ -14,6 +15,13 @@ class TourBooking(models.Model):
         ('cancelled', 'Cancelled'),
     ]
 
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name='tour_bookings',
+        null=True,
+        blank=True
+    )
     property = models.ForeignKey(
         Property,
         on_delete=models.CASCADE,

@@ -130,21 +130,21 @@ def profile_view(request):
             'last_name': user.last_name,
         })
 
-    # Student's tour bookings (matched by email or phone)
-    tour_filter = Q(email__iexact=user.email)
+    # Student's tour bookings (matched by user, email, or phone)
+    tour_filter = Q(user=user) | Q(email__iexact=user.email)
     if profile.phone:
         tour_filter |= Q(phone=profile.phone)
     my_tours = TourBooking.objects.filter(tour_filter).select_related('property', 'property__university').order_by('-created_at')
     pending_tours_count = my_tours.filter(status='pending').count()
     confirmed_tours_count = my_tours.filter(status='confirmed').count()
 
-    # Student's roommate posts
-    roommate_filter = Q()
+    # Student's roommate posts (matched by user, phone, or whatsapp)
+    roommate_filter = Q(user=user)
     if profile.phone:
         roommate_filter |= Q(contact_phone=profile.phone) | Q(whatsapp_number=profile.phone)
     if profile.whatsapp:
         roommate_filter |= Q(contact_phone=profile.whatsapp) | Q(whatsapp_number=profile.whatsapp)
-    my_roommate_posts = RoommatePost.objects.filter(roommate_filter).order_by('-created_at') if (profile.phone or profile.whatsapp) else RoommatePost.objects.none()
+    my_roommate_posts = RoommatePost.objects.filter(roommate_filter).order_by('-created_at')
 
     # Landlord's properties
     my_properties = Property.objects.filter(
@@ -170,7 +170,7 @@ def student_cancel_tour_view(request, booking_id):
     if request.method == 'POST':
         booking = get_object_or_404(TourBooking, pk=booking_id)
         profile = getattr(request.user, 'profile', None)
-        is_owner = (booking.email.lower() == request.user.email.lower()) or (profile and profile.phone and booking.phone == profile.phone)
+        is_owner = (booking.user == request.user) or (booking.email.lower() == request.user.email.lower()) or (profile and profile.phone and booking.phone == profile.phone)
         if is_owner:
             booking.status = 'cancelled'
             booking.save()
@@ -185,7 +185,8 @@ def student_toggle_roommate_post_view(request, post_id):
     if request.method == 'POST':
         post = get_object_or_404(RoommatePost, pk=post_id)
         profile = getattr(request.user, 'profile', None)
-        is_owner = (profile and profile.phone and (post.contact_phone == profile.phone or post.whatsapp_number == profile.phone)) or \
+        is_owner = (post.user == request.user) or \
+                   (profile and profile.phone and (post.contact_phone == profile.phone or post.whatsapp_number == profile.phone)) or \
                    (profile and profile.whatsapp and (post.whatsapp_number == profile.whatsapp or post.contact_phone == profile.whatsapp))
         if is_owner:
             post.is_active = not post.is_active
@@ -202,7 +203,8 @@ def student_delete_roommate_post_view(request, post_id):
     if request.method == 'POST':
         post = get_object_or_404(RoommatePost, pk=post_id)
         profile = getattr(request.user, 'profile', None)
-        is_owner = (profile and profile.phone and (post.contact_phone == profile.phone or post.whatsapp_number == profile.phone)) or \
+        is_owner = (post.user == request.user) or \
+                   (profile and profile.phone and (post.contact_phone == profile.phone or post.whatsapp_number == profile.phone)) or \
                    (profile and profile.whatsapp and (post.whatsapp_number == profile.whatsapp or post.contact_phone == profile.whatsapp))
         if is_owner:
             post.delete()
