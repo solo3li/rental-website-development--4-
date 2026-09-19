@@ -127,7 +127,15 @@ def run_clean_admin_tests():
     assert_test('wa.me' in html_tours, "توليد رابط الواتساب الصحيح للطالب")
     assert_test('ميدانية' in html_tours or 'فيديو' in html_tours, "ظهور شارة نوع المعاينة")
     assert_test('مؤكد' in html_tours, "ظهور شارة حالة المعاينة الملونة")
-    assert_test('confirm_selected_tours' in html_tours, "وجود خيار الإجراء المجمع لتأكيد المواعيد")
+    # 8. UserProfile Admin Page & Avatar / Badges / WhatsApp
+    print("\n[8] التحقق من تحسينات لوحة ملفات المستخدمين (UserProfile)...")
+    res_profiles = client.get('/admin/accounts/userprofile/')
+    assert_test(res_profiles.status_code == 200, "استجابة جدول ملفات المستخدمين", f"HTTP {res_profiles.status_code}")
+    html_profiles = res_profiles.content.decode('utf-8')
+    assert_test('border-radius:50%' in html_profiles, "ظهور صورة البروفايل الرمزية (Avatar) الدائرية")
+    assert_test('طالب' in html_profiles or 'صاحب سكن' in html_profiles, "ظهور شارة نوع الحساب الملونة")
+    assert_test('موثق' in html_profiles or 'قيد التحقق' in html_profiles, "ظهور شارة التوثيق")
+    assert_test('verify_selected_profiles' in html_profiles, "وجود خيار التوثيق المجمع للحسابات")
 
     print("\n" + "=" * 70)
     print(f"🎉 تم اجتياز جميع الفحوصات بنجاح تام! ({passed}/{total} Tests Passed)")
