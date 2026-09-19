@@ -97,17 +97,17 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'ar'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Cairo'
 
 USE_I18N = True
 
 USE_TZ = True
 
 LANGUAGES = [
+    ('ar', 'العربية'),
     ('en', 'English'),
-    ('ar', 'Arabic'),
 ]
 
 # Static files (CSS, JavaScript, Images)

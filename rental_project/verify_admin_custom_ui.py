@@ -172,6 +172,52 @@ def run_clean_admin_tests():
     assert_test('make_active' in html_rm and 'make_inactive' in html_rm, "ظهور الأكشنز الجماعية للتنشيط والإيقاف")
     assert_test('title="عرض حساب المستخدم في لوحة التحكم"' in html_rm or '(@' in html_rm, "ربط الحساب المسجل ببروفايله في الأدمن")
 
+    # 10. Bilingual Support & Language Switcher (AR & EN)
+    print("\n[10] التحقق من دعم اللغتين العربية والإنجليزية وزر التبديل السريع...")
+    # A) Check Arabic interface by default
+    res_ar = client.get('/admin/')
+    assert_test(res_ar.status_code == 200, "استجابة لوحة التحكم باللغة العربية")
+    html_ar = res_ar.content.decode('utf-8')
+    assert_test('سكن طلاب القاهرة — لوحة الإدارة' in html_ar, "ظهور عنوان اللوحة بالعربية")
+    assert_test('مؤشرات منصة سكن الطلاب' in html_ar, "ظهور شريط المؤشرات بالعربية")
+    assert_test('🌐 English' in html_ar, "ظهور زر التبديل إلى الإنجليزية (🌐 English)")
+
+    # B) Switch language to English via set_language
+    res_setlang = client.post('/i18n/setlang/', {'language': 'en', 'next': '/admin/'})
+    assert_test(res_setlang.status_code == 302, "إعادة التوجيه بعد تغيير اللغة إلى الإنجليزية")
+
+    # C) Verify English interface
+    res_en = client.get('/admin/')
+    assert_test(res_en.status_code == 200, "استجابة لوحة التحكم باللغة الإنجليزية")
+    html_en = res_en.content.decode('utf-8')
+    assert_test('Cairo Student Housing — Admin Panel' in html_en, "ظهور عنوان اللوحة بالإنجليزية")
+    assert_test('Student Housing Platform Metrics' in html_en, "ظهور شريط المؤشرات بالإنجليزية")
+    assert_test('🌐 العربية' in html_en, "ظهور زر التبديل إلى العربية (🌐 العربية)")
+
+    # D) Verify RoommatePost table in English
+    res_rm_en = client.get('/admin/roommates/roommatepost/')
+    assert_test(res_rm_en.status_code == 200, "استجابة جدول إعلانات زملاء السكن بالإنجليزية")
+    html_rm_en = res_rm_en.content.decode('utf-8')
+    assert_test('Female Student' in html_rm_en or 'Male Student' in html_rm_en, "ترجمة شارة النوع إلى الإنجليزية")
+    assert_test('Non-smoker' in html_rm_en or 'Smoker' in html_rm_en, "ترجمة شارة التدخين إلى الإنجليزية")
+    assert_test('EGP / mo' in html_rm_en, "ترجمة عملة الميزانية إلى الإنجليزية (EGP / mo)")
+    assert_test('💬 WhatsApp' in html_rm_en, "ترجمة زر الواتساب إلى الإنجليزية")
+    assert_test('Active' in html_rm_en or 'Inactive' in html_rm_en, "ترجمة شارة الحالة إلى الإنجليزية")
+
+    # E) Verify UserProfile table in English
+    res_prof_en = client.get('/admin/accounts/userprofile/')
+    assert_test(res_prof_en.status_code == 200, "استجابة جدول ملفات المستخدمين بالإنجليزية")
+    html_prof_en = res_prof_en.content.decode('utf-8')
+    assert_test('Student 🎓' in html_prof_en or 'Landlord 🏢' in html_prof_en, "ترجمة نوع الحساب إلى الإنجليزية")
+    assert_test('Verified ✅' in html_prof_en or 'Pending Verification ⚠️' in html_prof_en, "ترجمة شارة التوثيق إلى الإنجليزية")
+
+    # F) Switch back to Arabic to ensure full roundtrip
+    res_back_ar = client.post('/i18n/setlang/', {'language': 'ar', 'next': '/admin/'})
+    assert_test(res_back_ar.status_code == 302, "إعادة التوجيه بعد العودة للغة العربية")
+    res_ar_final = client.get('/admin/')
+    html_ar_final = res_ar_final.content.decode('utf-8')
+    assert_test('سكن طلاب القاهرة — لوحة الإدارة' in html_ar_final, "العودة للواجهة العربية بنجاح")
+
     print("\n" + "=" * 70)
     print(f"🎉 تم اجتياز جميع الفحوصات بنجاح تام! ({passed}/{total} Tests Passed)")
     print("=" * 70)

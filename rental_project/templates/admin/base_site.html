@@ -1,11 +1,38 @@
 {% extends "admin/base.html" %}
+{% load i18n %}
 
-{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:"سكن طلاب القاهرة" }}{% endblock %}
+{% block title %}
+    {% get_current_language as CURRENT_LANG %}
+    {% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {% if CURRENT_LANG == 'en' %}Cairo Student Housing{% else %}سكن طلاب القاهرة{% endif %}
+{% endblock %}
 
 {% block branding %}
+{% get_current_language as CURRENT_LANG %}
 <div id="site-name">
-    <a href="{% url 'admin:index' %}">سكن طلاب القاهرة — لوحة الإدارة</a>
+    <a href="{% url 'admin:index' %}">
+        {% if CURRENT_LANG == 'en' %}Cairo Student Housing — Admin Panel{% else %}سكن طلاب القاهرة — لوحة الإدارة{% endif %}
+    </a>
 </div>
+{% endblock %}
+
+{% block userlinks %}
+    {% get_current_language as CURRENT_LANG %}
+    <form action="{% url 'set_language' %}" method="post" style="display:inline-block; margin-inline-end: 8px; vertical-align: middle;">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        {% if CURRENT_LANG == 'ar' %}
+            <input type="hidden" name="language" value="en">
+            <button type="submit" class="admin-lang-btn" title="Switch Admin Panel to English">
+                🌐 English
+            </button>
+        {% else %}
+            <input type="hidden" name="language" value="ar">
+            <button type="submit" class="admin-lang-btn" title="تحويل لوحة الإدارة إلى العربية">
+                🌐 العربية
+            </button>
+        {% endif %}
+    </form>
+    {{ block.super }}
 {% endblock %}
 
 {% block extrahead %}
@@ -30,6 +57,27 @@
             display: inline-block !important;
             vertical-align: middle !important;
             line-height: 1.4 !important;
+        }
+
+        /* Language toggle button in admin header */
+        .admin-lang-btn {
+            background: rgba(255, 255, 255, 0.12) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            border-radius: 4px !important;
+            padding: 3px 9px !important;
+            font-size: 11px !important;
+            font-weight: bold !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            line-height: 1.2 !important;
+        }
+        .admin-lang-btn:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+            border-color: rgba(255, 255, 255, 0.5) !important;
         }
     </style>
 {% endblock %}

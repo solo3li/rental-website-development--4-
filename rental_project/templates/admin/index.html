@@ -14,18 +14,20 @@
 
     {% get_admin_kpis as kpis %}
 
+    {% get_current_language as CURRENT_LANG %}
+
     <!-- ============================================== -->
-    <!-- شريط إحصائيات مصغر وهادئ في أعلى الصفحة الرئيسية فقط -->
+    <!-- شريط إحصائيات مصغر وهادئ في أعلى الصفحة الرئيسية فقط (يدعم اللغتين) -->
     <!-- ============================================== -->
     <div style="margin-bottom: 20px; padding: 14px 18px; background: var(--body-bg, #fff); border: 1px solid var(--hairline-color, #e2e8f0); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
             <div style="font-weight: bold; font-size: 14px; color: var(--body-fg, #333);">
-                📊 مؤشرات منصة سكن الطلاب
+                {% if CURRENT_LANG == 'en' %}📊 Student Housing Platform Metrics{% else %}📊 مؤشرات منصة سكن الطلاب{% endif %}
             </div>
             {% if kpis.payment_settings %}
             <div style="font-size: 12px; color: var(--body-quiet-color, #666);">
-                العربون المطلوب: <strong style="color: var(--body-fg, #333);">{{ kpis.payment_settings.deposit_amount_egp }} ج.م</strong>
+                {% if CURRENT_LANG == 'en' %}Required Deposit:{% else %}العربون المطلوب:{% endif %} <strong style="color: var(--body-fg, #333);">{{ kpis.payment_settings.deposit_amount_egp }} {% if CURRENT_LANG == 'en' %}EGP{% else %}ج.م{% endif %}</strong>
                 {% if kpis.payment_settings.instapay_address %}
                 • InstaPay: <code>{{ kpis.payment_settings.instapay_address }}</code>
                 {% endif %}
@@ -38,31 +40,41 @@
             
             <!-- بطاقة 1: الإيصالات المعلقة -->
             <a href="{% url 'admin:tours_depositreceipt_changelist' %}?status__exact=pending" style="text-decoration: none; padding: 10px 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; display: block;">
-                <div style="font-size: 11px; color: #92400e; font-weight: bold;">⏳ إيصالات قيد المراجعة</div>
+                <div style="font-size: 11px; color: #92400e; font-weight: bold;">
+                    {% if CURRENT_LANG == 'en' %}⏳ Pending Receipts{% else %}⏳ إيصالات قيد المراجعة{% endif %}
+                </div>
                 <div style="font-size: 22px; font-weight: 800; color: #b45309; margin-top: 2px;">{{ kpis.pending_receipts_count }}</div>
             </a>
 
             <!-- بطاقة 2: الإيصالات المعتمدة -->
             <a href="{% url 'admin:tours_depositreceipt_changelist' %}?status__exact=approved" style="text-decoration: none; padding: 10px 14px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; display: block;">
-                <div style="font-size: 11px; color: #065f46; font-weight: bold;">✅ إيصالات معتمدة</div>
+                <div style="font-size: 11px; color: #065f46; font-weight: bold;">
+                    {% if CURRENT_LANG == 'en' %}✅ Approved Receipts{% else %}✅ إيصالات معتمدة{% endif %}
+                </div>
                 <div style="font-size: 22px; font-weight: 800; color: #059669; margin-top: 2px;">{{ kpis.approved_receipts_count }}</div>
             </a>
 
             <!-- بطاقة 3: حجوزات المعاينة المؤكدة -->
             <a href="{% url 'admin:tours_tourbooking_changelist' %}?status__exact=confirmed" style="text-decoration: none; padding: 10px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; display: block;">
-                <div style="font-size: 11px; color: #1e40af; font-weight: bold;">📅 معاينات مؤكدة</div>
+                <div style="font-size: 11px; color: #1e40af; font-weight: bold;">
+                    {% if CURRENT_LANG == 'en' %}📅 Confirmed Tours{% else %}📅 معاينات مؤكدة{% endif %}
+                </div>
                 <div style="font-size: 22px; font-weight: 800; color: #2563eb; margin-top: 2px;">{{ kpis.confirmed_tours_count }}</div>
             </a>
 
             <!-- بطاقة 4: شقق وسكن الطلاب -->
             <a href="{% url 'admin:properties_property_changelist' %}" style="text-decoration: none; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; display: block;">
-                <div style="font-size: 11px; color: #475569; font-weight: bold;">🏢 سكن الطلاب المسجل</div>
+                <div style="font-size: 11px; color: #475569; font-weight: bold;">
+                    {% if CURRENT_LANG == 'en' %}🏢 Registered Housing{% else %}🏢 سكن الطلاب المسجل{% endif %}
+                </div>
                 <div style="font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 2px;">{{ kpis.properties_count }}</div>
             </a>
 
             <!-- بطاقة 5: إعلانات رفقاء السكن -->
             <a href="{% url 'admin:roommates_roommatepost_changelist' %}" style="text-decoration: none; padding: 10px 14px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 6px; display: block;">
-                <div style="font-size: 11px; color: #5b21b6; font-weight: bold;">👥 رفقاء السكن النشطين</div>
+                <div style="font-size: 11px; color: #5b21b6; font-weight: bold;">
+                    {% if CURRENT_LANG == 'en' %}👥 Active Roommates{% else %}👥 رفقاء السكن النشطين{% endif %}
+                </div>
                 <div style="font-size: 22px; font-weight: 800; color: #7c3aed; margin-top: 2px;">{{ kpis.roommates_count }}</div>
             </a>
 
