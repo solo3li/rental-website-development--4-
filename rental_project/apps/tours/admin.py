@@ -216,18 +216,134 @@ class DepositReceiptAdmin(admin.ModelAdmin):
 
 @admin.register(TourBooking)
 class TourBookingAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'property', 'tour_date', 'tour_type', 'phone', 'deposit_status', 'status', 'created_at')
-    list_filter = ('status', 'tour_type', 'tour_date')
-    search_fields = ('full_name', 'email', 'phone', 'property__title')
-    readonly_fields = ('created_at',)
+    list_display = (
+        'full_name',
+        'student_contact',
+        'property_title',
+        'tour_date',
+        'tour_type_badge',
+        'deposit_status_badge',
+        'booking_status_badge',
+        'created_at_short',
+    )
+    list_filter = ('status', 'tour_type', 'tour_date', 'created_at')
+    search_fields = ('full_name', 'email', 'phone', 'property__title', 'property__title_ar')
+    readonly_fields = ('created_at', 'deposit_details_preview')
+    actions = ['confirm_selected_tours', 'cancel_selected_tours']
 
-    def deposit_status(self, obj):
+    fieldsets = (
+        ('بيانات الطالب والتواصل', {
+            'fields': (('full_name', 'user'), ('phone', 'email'), 'message')
+        }),
+        ('تفاصيل المعاينة والسكن', {
+            'fields': (('property', 'tour_date', 'tour_type'),)
+        }),
+        ('حالة الحجز والعربون', {
+            'fields': ('status', 'deposit_details_preview', 'created_at')
+        }),
+    )
+
+    def student_contact(self, obj):
+        clean_phone = ''.join(c for c in (obj.phone or '') if c.isdigit())
+        if clean_phone.startswith('0'):
+            clean_phone = '2' + clean_phone
+        wa_url = f"https://wa.me/{clean_phone}"
+        return format_html(
+            '<span style="display:inline-flex; align-items:center; gap:6px; white-space:nowrap;">'
+            '<span>{}</span>'
+            '<a href="{}" target="_blank" title="مراسلة الطالب على واتساب" style="display:inline-block; text-decoration:none; background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; padding:1px 6px; border-radius:4px; font-size:11px; font-weight:bold;">💬 واتساب</a>'
+            '</span>',
+            obj.phone, wa_url
+        )
+    student_contact.short_description = "الهاتف والتواصل"
+
+    def property_title(self, obj):
+        if obj.property:
+            return obj.property.title_ar or obj.property.title
+        return "-"
+    property_title.short_description = "السكن المطلوب"
+
+    def tour_type_badge(self, obj):
+        if obj.tour_type == 'in_person':
+            return format_html('<span style="display:inline-block; white-space:nowrap; background:#f1f5f9; color:#334155; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; border:1px solid #cbd5e1;">🚶‍♂️ ميدانية</span>')
+        return format_html('<span style="display:inline-block; white-space:nowrap; background:#ede9fe; color:#6d28d9; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; border:1px solid #ddd6fe;">📹 فيديو</span>')
+    tour_type_badge.short_description = "النوع"
+
+    def deposit_status_badge(self, obj):
         if hasattr(obj, 'deposit_receipt'):
             r = obj.deposit_receipt
+            receipt_url = reverse('admin:tours_depositreceipt_change', args=[r.id])
             if r.status == 'approved':
-                return format_html('<span style="color:#15803d; font-weight:bold;">مدفوع ومعتمد ({0} ج.م)</span>', r.amount)
+                return format_html(
+                    '<a href="{}" style="display:inline-block; white-space:nowrap; background:#dcfce7; color:#15803d; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; text-decoration:none; border:1px solid #bbf7d0;" title="عرض الإيصال">'
+                    'مدفوع ({} ج.م - {}) ✅'
+                    '</a>',
+                    receipt_url, r.amount, r.get_payment_method_display()
+                )
             elif r.status == 'rejected':
-                return format_html('<span style="color:#b91c1c; font-weight:bold;">عربون مرفوض</span>')
-            return format_html('<a href="{0}" style="color:#a16207; font-weight:bold; text-decoration:underline;">إيصال قيد المراجعة ⏳</a>', reverse('admin:tours_depositreceipt_change', args=[r.id]))
-        return format_html('<span style="color:#94a3b8;">بدون إيصال</span>')
-    deposit_status.short_description = "حالة العربون"
+                return format_html(
+                    '<a href="{}" style="display:inline-block; white-space:nowrap; background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; text-decoration:none; border:1px solid #fecaca;" title="عرض سبب الرفض">'
+                    'عربون مرفوض ❌'
+                    '</a>',
+                    receipt_url
+                )
+            return format_html(
+                '<a href="{}" style="display:inline-block; white-space:nowrap; background:#fef9c3; color:#854d0e; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; text-decoration:none; border:1px solid #fef08a;" title="مراجعة الإيصال">'
+                'قيد المراجعة ({} ج.م) ⏳'
+                '</a>',
+                receipt_url, r.amount
+            )
+        return format_html('<span style="color:#94a3b8; font-size:11px; white-space:nowrap;">بدون إيصال</span>')
+    deposit_status_badge.short_description = "العربون والإيصال"
+
+    def booking_status_badge(self, obj):
+        if obj.status == 'confirmed':
+            return format_html('<span style="display:inline-block; white-space:nowrap; background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px; border:1px solid #bbf7d0;">مؤكد ✅</span>')
+        elif obj.status == 'pending':
+            return format_html('<span style="display:inline-block; white-space:nowrap; background:#fef9c3; color:#854d0e; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px; border:1px solid #fef08a;">قيد الانتظار ⏳</span>')
+        elif obj.status == 'rejected':
+            return format_html('<span style="display:inline-block; white-space:nowrap; background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px; border:1px solid #fecaca;">مرفوض ❌</span>')
+        elif obj.status == 'completed':
+            return format_html('<span style="display:inline-block; white-space:nowrap; background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px; border:1px solid #cbd5e1;">مكتملة 🏁</span>')
+        elif obj.status == 'cancelled':
+            return format_html('<span style="display:inline-block; white-space:nowrap; background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px; border:1px solid #fecaca;">ملغية 🚫</span>')
+        return obj.get_status_display()
+    booking_status_badge.short_description = "حالة المعاينة"
+
+    def created_at_short(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M")
+    created_at_short.short_description = "تاريخ الطلب"
+
+    def deposit_details_preview(self, obj):
+        if hasattr(obj, 'deposit_receipt'):
+            r = obj.deposit_receipt
+            receipt_url = reverse('admin:tours_depositreceipt_change', args=[r.id])
+            img_html = f'<div style="margin-top:6px;"><a href="{r.receipt_image.url}" target="_blank"><img src="{r.receipt_image.url}" style="max-width:240px; border-radius:6px; border:1px solid #cbd5e1;" /></a></div>' if r.receipt_image else ''
+            return format_html(
+                '<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:10px; font-size:12px; max-width:500px;">'
+                '<div><strong>المبلغ:</strong> {} ج.م ({})</div>'
+                '<div><strong>الحالة:</strong> {}</div>'
+                '<div><strong>اسم / رقم المحول:</strong> {}</div>'
+                '<div><strong>الرقم المرجعي:</strong> {}</div>'
+                '<div><a href="{}" style="color:#0284c7; font-weight:bold;">انتقل لصفحة مراجعة هذا الإيصال ↗</a></div>'
+                '{}'
+                '</div>',
+                r.amount, r.get_payment_method_display(),
+                r.get_status_display(),
+                r.sender_info or '-',
+                r.reference_number or '-',
+                receipt_url,
+                format_html(img_html)
+            )
+        return "لا يوجد إيصال عربون مرتبط بهذا الحجز."
+    deposit_details_preview.short_description = "بيانات إيصال العربون المرفق"
+
+    def confirm_selected_tours(self, request, queryset):
+        count = queryset.update(status='confirmed')
+        messages.success(request, f"تم تأكيد {count} موعد معاينة بنجاح ✅")
+    confirm_selected_tours.short_description = "تأكيد مواعيد المعاينة المحددة ✅"
+
+    def cancel_selected_tours(self, request, queryset):
+        count = queryset.update(status='cancelled')
+        messages.warning(request, f"تم إلغاء {count} موعد معاينة 🚫")
+    cancel_selected_tours.short_description = "إلغاء مواعيد المعاينة المحددة 🚫"

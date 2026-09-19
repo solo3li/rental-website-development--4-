@@ -118,6 +118,17 @@ def run_clean_admin_tests():
     res_settings = client.get('/admin/tours/paymentsettings/')
     assert_test(res_settings.status_code == 200, "استجابة إعدادات الدفع", f"HTTP {res_settings.status_code}")
 
+    # 7. TourBooking Admin Page & WhatsApp / Status Badges
+    print("\n[7] التحقق من تحسينات لوحة حجوزات المعاينة (TourBooking)...")
+    res_tours = client.get('/admin/tours/tourbooking/')
+    assert_test(res_tours.status_code == 200, "استجابة جدول حجوزات المعاينة", f"HTTP {res_tours.status_code}")
+    html_tours = res_tours.content.decode('utf-8')
+    assert_test('💬 واتساب' in html_tours, "ظهور زر مراسلة الواتساب المباشر")
+    assert_test('wa.me' in html_tours, "توليد رابط الواتساب الصحيح للطالب")
+    assert_test('ميدانية' in html_tours or 'فيديو' in html_tours, "ظهور شارة نوع المعاينة")
+    assert_test('مؤكد' in html_tours, "ظهور شارة حالة المعاينة الملونة")
+    assert_test('confirm_selected_tours' in html_tours, "وجود خيار الإجراء المجمع لتأكيد المواعيد")
+
     print("\n" + "=" * 70)
     print(f"🎉 تم اجتياز جميع الفحوصات بنجاح تام! ({passed}/{total} Tests Passed)")
     print("=" * 70)
