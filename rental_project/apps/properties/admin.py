@@ -139,5 +139,9 @@ class PropertyAdmin(gis_admin.GISModelAdmin):
     rental_type_display.short_description = "نوع الإيجار"
 
     def beds_status(self, obj):
-        return f"{obj.available_beds} من أصل {obj.total_capacity} سرير"
-    beds_status.short_description = "الأسِرّة المتاحة"
+        if obj.available_beds == 0:
+            return format_html('<span style="display:inline-block; white-space:nowrap; background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:11px;">مكتمل (0/{} سرير)</span>', obj.total_capacity)
+        elif obj.available_beds <= 2:
+            return format_html('<span style="display:inline-block; white-space:nowrap; background:#fef3c7; color:#b45309; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:11px;">شاغر محدود ({}/{} سرير)</span>', obj.available_beds, obj.total_capacity)
+        return format_html('<span style="display:inline-block; white-space:nowrap; background:#dcfce7; color:#15803d; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:11px;">متاح ({}/{} سرير)</span>', obj.available_beds, obj.total_capacity)
+    beds_status.short_description = "الأسِرّة الشاغرة"

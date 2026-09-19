@@ -1,0 +1,108 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static admin_kpis %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static "admin/css/dashboard.css" %}">{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+    {% get_admin_kpis as kpis %}
+
+    <!-- ============================================== -->
+    <!-- شريط إحصائيات مصغر وهادئ في أعلى الصفحة الرئيسية فقط -->
+    <!-- ============================================== -->
+    <div style="margin-bottom: 20px; padding: 14px 18px; background: var(--body-bg, #fff); border: 1px solid var(--hairline-color, #e2e8f0); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <div style="font-weight: bold; font-size: 14px; color: var(--body-fg, #333);">
+                📊 مؤشرات منصة سكن الطلاب
+            </div>
+            {% if kpis.payment_settings %}
+            <div style="font-size: 12px; color: var(--body-quiet-color, #666);">
+                العربون المطلوب: <strong style="color: var(--body-fg, #333);">{{ kpis.payment_settings.deposit_amount_egp }} ج.م</strong>
+                {% if kpis.payment_settings.instapay_address %}
+                • InstaPay: <code>{{ kpis.payment_settings.instapay_address }}</code>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- بطاقات مصغرة في صف واحد -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;">
+            
+            <!-- بطاقة 1: الإيصالات المعلقة -->
+            <a href="{% url 'admin:tours_depositreceipt_changelist' %}?status__exact=pending" style="text-decoration: none; padding: 10px 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; display: block;">
+                <div style="font-size: 11px; color: #92400e; font-weight: bold;">⏳ إيصالات قيد المراجعة</div>
+                <div style="font-size: 22px; font-weight: 800; color: #b45309; margin-top: 2px;">{{ kpis.pending_receipts_count }}</div>
+            </a>
+
+            <!-- بطاقة 2: الإيصالات المعتمدة -->
+            <a href="{% url 'admin:tours_depositreceipt_changelist' %}?status__exact=approved" style="text-decoration: none; padding: 10px 14px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; display: block;">
+                <div style="font-size: 11px; color: #065f46; font-weight: bold;">✅ إيصالات معتمدة</div>
+                <div style="font-size: 22px; font-weight: 800; color: #059669; margin-top: 2px;">{{ kpis.approved_receipts_count }}</div>
+            </a>
+
+            <!-- بطاقة 3: حجوزات المعاينة المؤكدة -->
+            <a href="{% url 'admin:tours_tourbooking_changelist' %}?status__exact=confirmed" style="text-decoration: none; padding: 10px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; display: block;">
+                <div style="font-size: 11px; color: #1e40af; font-weight: bold;">📅 معاينات مؤكدة</div>
+                <div style="font-size: 22px; font-weight: 800; color: #2563eb; margin-top: 2px;">{{ kpis.confirmed_tours_count }}</div>
+            </a>
+
+            <!-- بطاقة 4: شقق وسكن الطلاب -->
+            <a href="{% url 'admin:properties_property_changelist' %}" style="text-decoration: none; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; display: block;">
+                <div style="font-size: 11px; color: #475569; font-weight: bold;">🏢 سكن الطلاب المسجل</div>
+                <div style="font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 2px;">{{ kpis.properties_count }}</div>
+            </a>
+
+            <!-- بطاقة 5: إعلانات رفقاء السكن -->
+            <a href="{% url 'admin:roommates_roommatepost_changelist' %}" style="text-decoration: none; padding: 10px 14px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 6px; display: block;">
+                <div style="font-size: 11px; color: #5b21b6; font-weight: bold;">👥 رفقاء السكن النشطين</div>
+                <div style="font-size: 22px; font-weight: 800; color: #7c3aed; margin-top: 2px;">{{ kpis.roommates_count }}</div>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- قائمة الجداول الافتراضية لجانغو بالكامل دون أي تعديل -->
+    {% include "admin/app_list.html" with app_list=app_list %}
+
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="recent-actions-module">
+        <h2>{% translate 'Recent actions' %}</h2>
+        <h3>{% translate 'My actions' %}</h3>
+        {% load log %}
+        {% get_admin_log 10 as admin_log for_user user %}
+        {% if not admin_log %}
+        <p>{% translate 'None available' %}</p>
+        {% else %}
+        <ul class="actionlist">
+        {% for entry in admin_log %}
+        <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+            {% if entry.is_deletion or not entry.get_admin_url %}
+                {{ entry.object_repr }}
+            {% else %}
+                <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+            {% endif %}
+            <br>
+            {% if entry.content_type %}
+                <span class="mini quiet">{% filter capfirst %}{{ entry.content_type.name }}{% endfilter %}</span>
+            {% else %}
+                <span class="mini quiet">{% translate 'Unknown content' %}</span>
+            {% endif %}
+        </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

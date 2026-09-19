@@ -1,0 +1,22 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:"سكن طلاب القاهرة" }}{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+    <a href="{% url 'admin:index' %}">سكن طلاب القاهرة — لوحة الإدارة</a>
+</div>
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        /* Minimalist tweaks: Ensure badges and action buttons never wrap vertically */
+        .status-badge, .badge-clean {
+            white-space: nowrap !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            line-height: 1.4 !important;
+        }
+    </style>
+{% endblock %}

@@ -98,32 +98,32 @@ class DepositReceiptAdmin(admin.ModelAdmin):
     property_link.short_description = "السكن المطلوب"
 
     def amount_display(self, obj):
-        return format_html('<span style="font-weight:bold; color:#059669;">{} ج.م</span>', obj.amount)
+        return format_html('<span style="font-weight:bold; color:#059669; white-space:nowrap;">{} ج.م</span>', obj.amount)
     amount_display.short_description = "العربون"
 
     def payment_method_badge(self, obj):
         methods = {
-            'instapay': ('#e0e7ff', '#4338ca', 'InstaPay'),
-            'vodafone_cash': ('#fee2e2', '#b91c1c', 'فودافون كاش'),
-            'orange_cash': ('#ffedd5', '#c2410c', 'أورنج كاش'),
+            'instapay': ('#e0e7ff', '#3730a3', 'InstaPay'),
+            'vodafone_cash': ('#fee2e2', '#991b1b', 'فودافون كاش'),
+            'orange_cash': ('#ffedd5', '#9a3412', 'أورنج كاش'),
         }
-        bg, col, text = methods.get(obj.payment_method, ('#f1f5f9', '#475569', obj.get_payment_method_display()))
-        return format_html(f'<span style="background:{bg}; color:{col}; padding:3px 8px; border-radius:12px; font-weight:bold; font-size:11px;">{text}</span>')
+        bg, col, text = methods.get(obj.payment_method, ('#f1f5f9', '#334155', obj.get_payment_method_display()))
+        return format_html(f'<span style="display:inline-block; white-space:nowrap; background:{bg}; color:{col}; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:11px;">{text}</span>')
     payment_method_badge.short_description = "وسيلة التحويل"
 
     def status_badge(self, obj):
         if obj.status == 'approved':
-            return format_html('<span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:11px;">معتمد ✅</span>')
+            return format_html('<span style="display:inline-block; white-space:nowrap; background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px; border:1px solid #bbf7d0;">معتمد ✅</span>')
         elif obj.status == 'rejected':
-            return format_html('<span style="background:#fee2e2; color:#b91c1c; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:11px;">مرفوض ❌</span>')
-        return format_html('<span style="background:#fef9c3; color:#a16207; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:11px;">قيد المراجعة ⏳</span>')
+            return format_html('<span style="display:inline-block; white-space:nowrap; background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px; border:1px solid #fecaca;">مرفوض ❌</span>')
+        return format_html('<span style="display:inline-block; white-space:nowrap; background:#fef9c3; color:#854d0e; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:11px; border:1px solid #fef08a;">قيد المراجعة ⏳</span>')
     status_badge.short_description = "الحالة"
 
     def receipt_thumbnail(self, obj):
         if obj.receipt_image:
             return format_html(
-                '<a href="{0}" target="_blank" title="اضغط للتكبير" onclick="window.open(\'{0}\', \'_blank\', \'width=900,height=1000\'); return false;">'
-                '<img src="{0}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 2px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" />'
+                '<a href="{0}" target="_blank" title="اضغط لفتح الصورة الأصلية">'
+                '<img src="{0}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; display: block;" />'
                 '</a>',
                 obj.receipt_image.url
             )
@@ -135,9 +135,9 @@ class DepositReceiptAdmin(admin.ModelAdmin):
             return format_html(
                 '<div style="margin-top: 8px;">'
                 '<a href="{0}" target="_blank">'
-                '<img src="{0}" style="max-width: 480px; max-height: 600px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); border: 1px solid #e2e8f0;" />'
+                '<img src="{0}" style="max-width: 440px; max-height: 550px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;" />'
                 '</a>'
-                '<p style="font-size: 11px; color: #64748b; margin-top: 4px;">اضغط على الصورة لفتحها بالحجم الأصلي الكامل.</p>'
+                '<p style="font-size: 11px; color: #64748b; margin-top: 4px;">اضغط على الصورة لفتحها بالحجم الكامل.</p>'
                 '</div>',
                 obj.receipt_image.url
             )
@@ -153,8 +153,8 @@ class DepositReceiptAdmin(admin.ModelAdmin):
             approve_url = reverse('admin:tours_depositreceipt_approve', args=[obj.id])
             reject_url = reverse('admin:tours_depositreceipt_reject', args=[obj.id])
             return format_html(
-                '<a class="button" style="background:#16a34a; color:#fff; padding:4px 8px; font-size:11px; font-weight:bold; border-radius:6px; text-decoration:none; margin-right:4px;" href="{}">قبول ✅</a>'
-                '<a class="button" style="background:#dc2626; color:#fff; padding:4px 8px; font-size:11px; font-weight:bold; border-radius:6px; text-decoration:none;" href="{}">رفض ❌</a>',
+                '<a href="{}" style="display:inline-block; white-space:nowrap; background:#16a34a; color:#fff; padding:3px 8px; font-size:11px; font-weight:bold; border-radius:4px; text-decoration:none; margin-left:4px;">قبول ✅</a>'
+                '<a href="{}" style="display:inline-block; white-space:nowrap; background:#dc2626; color:#fff; padding:3px 8px; font-size:11px; font-weight:bold; border-radius:4px; text-decoration:none;">رفض ❌</a>',
                 approve_url, reject_url
             )
         return "-"
@@ -177,7 +177,8 @@ class DepositReceiptAdmin(admin.ModelAdmin):
     def reject_receipt_view(self, request, receipt_id):
         receipt = get_object_or_404(DepositReceipt, pk=receipt_id)
         receipt.status = 'rejected'
-        receipt.rejection_reason = "إيصال غير مطابق أو تم إلغاؤه من قبل المشرف."
+        reason = request.GET.get('reason') or request.POST.get('reason') or "إيصال غير مطابق أو تم إلغاؤه من قبل المشرف."
+        receipt.rejection_reason = reason
         receipt.reviewed_by = request.user
         receipt.reviewed_at = timezone.now()
         receipt.save()
@@ -186,7 +187,7 @@ class DepositReceiptAdmin(admin.ModelAdmin):
         receipt.booking.status = 'rejected'
         receipt.booking.save()
 
-        messages.warning(request, f"تم رفض إيصال الطالب {receipt.booking.full_name} وإلغاء الطلب ❌")
+        messages.warning(request, f"تم رفض إيصال الطالب {receipt.booking.full_name} وإلغاء الطلب: ({reason}) ❌")
         return redirect('admin:tours_depositreceipt_changelist')
 
     def approve_selected(self, request, queryset):
