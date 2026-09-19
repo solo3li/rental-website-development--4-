@@ -15,6 +15,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from apps.properties.models import Property
 from apps.tours.models import TourBooking, DepositReceipt, PaymentSettings
+from apps.roommates.models import RoommatePost
 
 VALID_JPEG_BYTES = (
     b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00\xff\xdb\x00C\x00'
@@ -136,6 +137,40 @@ def run_clean_admin_tests():
     assert_test('طالب' in html_profiles or 'صاحب سكن' in html_profiles, "ظهور شارة نوع الحساب الملونة")
     assert_test('موثق' in html_profiles or 'قيد التحقق' in html_profiles, "ظهور شارة التوثيق")
     assert_test('verify_selected_profiles' in html_profiles, "وجود خيار التوثيق المجمع للحسابات")
+
+    # 9. RoommatePost Admin Page & Badges / WhatsApp / Bio / Actions
+    print("\n[9] التحقق من تحسينات لوحة إعلانات زملاء السكن (RoommatePost)...")
+    admin_user = User.objects.filter(is_superuser=True).first()
+    post_with_user = RoommatePost.objects.filter(user__isnull=False).first()
+    if not post_with_user:
+        first_post = RoommatePost.objects.first()
+        if first_post:
+            first_post.user = admin_user
+            first_post.save()
+        else:
+            RoommatePost.objects.create(
+                user=admin_user,
+                student_name="نور أحمد",
+                gender="female",
+                faculty="طب قصر العيني",
+                target_area="الدقي",
+                budget_max_egp=3000,
+                bio="أبحث عن زميلة سكن هادئة وملتزمة في شقة قريبة من المترو",
+                contact_phone="01012345678",
+                whatsapp_number="01012345678",
+                smoking=False,
+                is_active=True
+            )
+    res_rm = client.get('/admin/roommates/roommatepost/')
+    assert_test(res_rm.status_code == 200, "استجابة جدول إعلانات زملاء السكن", f"HTTP {res_rm.status_code}")
+    html_rm = res_rm.content.decode('utf-8')
+    assert_test('💬 واتساب' in html_rm, "ظهور زر مراسلة الواتساب المباشر لزميل السكن")
+    assert_test('wa.me' in html_rm, "توليد رابط واتساب مع رسالة جاهزة")
+    assert_test('طالبة (بنات)' in html_rm or 'طالب (شباب)' in html_rm, "ظهور شارة النوع الملونة")
+    assert_test('غير مدخن' in html_rm or 'مدخن' in html_rm, "ظهور شارة التدخين")
+    assert_test('ج.م / شهر' in html_rm, "تنسيق الميزانية المالية")
+    assert_test('make_active' in html_rm and 'make_inactive' in html_rm, "ظهور الأكشنز الجماعية للتنشيط والإيقاف")
+    assert_test('title="عرض حساب المستخدم في لوحة التحكم"' in html_rm or '(@' in html_rm, "ربط الحساب المسجل ببروفايله في الأدمن")
 
     print("\n" + "=" * 70)
     print(f"🎉 تم اجتياز جميع الفحوصات بنجاح تام! ({passed}/{total} Tests Passed)")
